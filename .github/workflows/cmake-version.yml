@@ -23,8 +23,9 @@ jobs:
             - name: Check dependencies
               run: |
                   sudo apt-get update
-                  sudo apt-get install -y lcov curl wget git cmake ninja-build g++ libboost-all-dev libssl-dev
-                  ninja --version
+                  sudo apt-get install -y cmake 
+                  sudo apt-get install -y ${{ matrix.compiler.cc }}
+                   sudo apt-get install -y ${{ matrix.compiler.cxx }} 
                   cmake --version
               
             - name: CMake configure
@@ -40,4 +41,4 @@ jobs:
             - name: Run tests
               run: |
                  cmake --build ./build --target SMCE_Tests
-                 (cd build/test/; ctest --output-on-failure)
+                 ctest
