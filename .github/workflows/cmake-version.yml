@@ -5,7 +5,8 @@ jobs:
         runs-on: ubuntu-latest
         strategy:
             matrix:
-                cmake: [3.12]
+                cmake: [3.12, 3.13]
+                        
                 compiler:
                     - cc: gcc-10
                       cxx: g++-10
@@ -22,9 +23,15 @@ jobs:
             
             - name: Check dependencies
               run: |
-                  sudo apt-get update
-                  sudo apt-get install -y cmake 
-                  sudo apt-get install -y lcov curl wget git cmake ninja-build g++ libboost-all-dev libssl-dev
+                  sudo apt-get update 
+                  sudo apt-get install -y curl wget git ninja-build g++ libboost-all-dev libssl-dev build-essential
+                  
+            - name: Install different versions of cmake
+              run: |
+                  wget http://www.cmake.org/files/v${{ matrix.cmake }}/cmake-${{ matrix.cmake }}.0-Linux-x86_64.tar.gz
+                  tar -zxvf ${{ matrix.cmake }}.0-Linux-x86_64.tar.gz
+                  cd cmake-${{ matrix.cmake }}.0-Linux-x86_64/
+                  export PATH=$PATH:$(pwd)/bin
                   cmake --version
               
             - name: CMake configure
@@ -35,7 +42,7 @@ jobs:
                   
             - name: CMake build
               run: |
-               cmake --build ./build
+                  cmake --build ./build
               
             - name: Run tests
               run: |
