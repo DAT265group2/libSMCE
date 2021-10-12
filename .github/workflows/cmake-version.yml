@@ -68,5 +68,5 @@ jobs:
                
             - name: Run tests
               run: |
-                  cd ${ env.build_dir }/test 
+                  cd ${env.build_dir}/test 
                   ctest
