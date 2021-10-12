@@ -5,7 +5,8 @@ jobs:
         runs-on: ubuntu-latest
         strategy:
             matrix:
-                cmake: [3.12, 3.13]
+                cmake_newer: [3.16]
+                cmake_older: [3.12]
                         
                 compiler:
                     - cc: gcc-10
@@ -13,9 +14,11 @@ jobs:
                     - cc: clang-10
                       cxx: clang++-10          
         env:
-            cmake: ${{ matrix.cmake }} 
+            cmake_newer: ${{ matrix.cmake_newer }} 
+            cmake_older: ${{ matrix.cmake_older }}
             CC: ${{ matrix.compiler.cc }}
             CXX: ${{ matrix.compiler.cxx }} 
+            build_dir: build
            
         steps:  
             - name: Checkout code
@@ -24,15 +27,16 @@ jobs:
             - name: Check dependencies
               run: |
                   sudo apt-get update 
-                  sudo apt-get install -y curl wget git ninja-build g++ libboost-all-dev libssl-dev build-essential
+                  sudo apt-get install -y curl wget git ninja-build g++ libboost-all-dev libssl-dev
                   
             - name: Install different versions of cmake
               run: |
-                  wget http://www.cmake.org/files/v${{ matrix.cmake }}/cmake-${{ matrix.cmake }}.0-Linux-x86_64.tar.gz
-                  tar -zxvf cmake-${{ matrix.cmake }}.0-Linux-x86_64.tar.gz
-                  cd cmake-${{ matrix.cmake }}.0-Linux-x86_64/
-                  export PATH=$PATH:$(pwd)/bin
-                  cmake --version
+                  wget http://www.cmake.org/files/v${{ matrix.cmake_newer }}/cmake-${{ matrix.cmake_newer }}.0-Linux-x86_64.tar.gz
+                  tar -zxvf cmake-${{ matrix.cmake_newer }}.0-Linux-x86_64.tar.gz
+                  cd cmake-${{ matrix.cmake_newer }}.0-Linux-x86_64/
+                  echo 'export PATH=$PATH:$(pwd)/bin'>> ~/.bashrc
+                  source ~/.bashrc
+                  cmake --version 
               
             - name: CMake configure
               run: |
@@ -44,7 +48,25 @@ jobs:
               run: |
                   cmake --build ./build
               
-            - name: Run tests
+            - name: Run libSMCE & SMCE_Tests
               run: |
                  cmake --build ./build --target SMCE_Tests
-                 ctest
+             
+            - name: Unistall cmake
+              run: |
+                cd ..
+                rm -r cmake-${{ matrix.cmake_newer }}.0-Linux-x86_64
+                
+            - name: Reinstall cmake
+              run: |
+                  wget http://www.cmake.org/files/v${{ matrix.cmake_older }}/cmake-${{ matrix.cmake_older }}.0-Linux-x86_64.tar.gz
+                  tar -xzvf cmake-${{ matrix.cmake_older }}.0-Linux-x86_64.tar.gz
+                  cd cmake-${{ matrix.cmake_older }}.0-Linux-x86_64/
+                  echo 'export PATH=$PATH:$(pwd)/bin'>> ~/.bashrc
+                  source ~/.bashrc
+                  cmake --version
+               
+            - name: Run tests
+              run: |
+                  cd ${{ env.build_dir }} 
+                  ctest
