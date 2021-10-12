@@ -68,5 +68,5 @@ jobs:
                
             - name: Run tests
               run: |
-                  cd ./build/test 
+                  cd /home/runner/work/libSMCE/libSMCE/build/test 
                   ctest
