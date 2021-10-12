@@ -55,12 +55,12 @@ jobs:
             - name: Unistall cmake
               run: |
                 cd /usr/local/bin/
-                rm -r cmake-${{ matrix.cmake_newer }}.0-Linux-x86_64
+                sudo rm -r cmake-${{ matrix.cmake_newer }}.0-Linux-x86_64
                 
             - name: Reinstall cmake
               run: |
                   wget http://www.cmake.org/files/v${{ matrix.cmake_older }}/cmake-${{ matrix.cmake_older }}.0-Linux-x86_64.tar.gz
-                  tar -xzvf cmake-${{ matrix.cmake_older }}.0-Linux-x86_64.tar.gz -C /usr/local/bin
+                  sudo tar -xzvf cmake-${{ matrix.cmake_older }}.0-Linux-x86_64.tar.gz -C /usr/local/bin
                   cd /usr/local/bin/cmake-${{ matrix.cmake_older }}.0-Linux-x86_64/
                   echo 'export PATH=$PATH:$(pwd)/bin'>> ~/.bashrc
                   source ~/.bashrc
