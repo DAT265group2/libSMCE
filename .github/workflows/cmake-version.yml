@@ -32,11 +32,11 @@ jobs:
             - name: Install different versions of cmake
               run: |
                   wget http://www.cmake.org/files/v${{ matrix.cmake_newer }}/cmake-${{ matrix.cmake_newer }}.0-Linux-x86_64.tar.gz
-                  tar -zxvf cmake-${{ matrix.cmake_newer }}.0-Linux-x86_64.tar.gz
-                  cd cmake-${{ matrix.cmake_newer }}.0-Linux-x86_64/
+                  sudo tar -xzvf cmake-${{ matrix.cmake_newer }}.0-Linux-x86_64.tar.gz -C /usr/local/bin
+                  cd /usr/local/bin/cmake-${{ matrix.cmake_newer }}.0-Linux-x86_64/
                   echo 'export PATH=$PATH:$(pwd)/bin'>> ~/.bashrc
                   source ~/.bashrc
-                  cmake --version 
+                  cmake --version
               
             - name: CMake configure
               run: |
@@ -54,14 +54,14 @@ jobs:
              
             - name: Unistall cmake
               run: |
-                cd ..
+                cd /usr/local/bin/
                 rm -r cmake-${{ matrix.cmake_newer }}.0-Linux-x86_64
                 
             - name: Reinstall cmake
               run: |
                   wget http://www.cmake.org/files/v${{ matrix.cmake_older }}/cmake-${{ matrix.cmake_older }}.0-Linux-x86_64.tar.gz
-                  tar -xzvf cmake-${{ matrix.cmake_older }}.0-Linux-x86_64.tar.gz
-                  cd cmake-${{ matrix.cmake_older }}.0-Linux-x86_64/
+                  tar -xzvf cmake-${{ matrix.cmake_older }}.0-Linux-x86_64.tar.gz -C /usr/local/bin
+                  cd /usr/local/bin/cmake-${{ matrix.cmake_older }}.0-Linux-x86_64/
                   echo 'export PATH=$PATH:$(pwd)/bin'>> ~/.bashrc
                   source ~/.bashrc
                   cmake --version
