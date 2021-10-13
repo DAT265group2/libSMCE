@@ -4,6 +4,7 @@ jobs:
   minimum-runtime-cmake-version:
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         cmake_build: [ 3 ]
         cmake_build_sub_release: [ 16, 17, 18, 19 ]
