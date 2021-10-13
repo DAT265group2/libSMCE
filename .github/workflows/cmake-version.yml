@@ -31,7 +31,7 @@ jobs:
           sudo mv cmake-${{matrix.cmake_build}}.0-Linux-x86_64.sh /opt
           cd /opt
           sudo chmod +x cmake-${{matrix.cmake_build}}.0-Linux-x86_64.sh
-          sudo bash ./cmake-${{matrix.cmake_build}}.0-Linux-x86_64.sh
+          sudo bash ./cmake-${{matrix.cmake_build}}.0-Linux-x86_64.sh -y
           sudo ln -s /opt/cmake-${{matrix.cmake_build}}.0-Linux-x86_64.sh/bin/* /usr/local/bin
           cmake --version
           pwd
