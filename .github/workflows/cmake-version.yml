@@ -49,7 +49,7 @@ jobs:
           export BOOST_ROOT="${pwd}/boost_root"
           
           mkdir build
-          cmake -G Ninja \
+          cmake \
             -DCMAKE_BUILD_TYPE=Release \
             -DSMCE_CXXRT_LINKING=STATIC \
             -DSMCE_BOOST_LINKING=STATIC \
