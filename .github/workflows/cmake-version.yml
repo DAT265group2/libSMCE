@@ -22,7 +22,7 @@ jobs:
           pwd
           cmake --version
           sudo apt-get update
-          sudo apt-get install -y crul wget git ninja-build g++ libboost-all-dev libssl-dev
+          sudo apt-get install -y curl wget git ninja-build g++ libboost-all-dev libssl-dev
 
       - name: Install CMake build minimum version
         run: |
