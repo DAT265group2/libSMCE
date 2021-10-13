@@ -27,7 +27,7 @@ jobs:
 
       - name: Install CMake build minimum version
         run: |
-          wget https://cmake.org/files/v${{matrix.cmake_build}}/cmake-${{matrix.cmake_build}}.${{matrix.cmake_build_sub_release}}.${{matrix.cmake_build_sub_version}}-Linux-x86_64.sh
+          wget https://cmake.org/files/v${{matrix.cmake_build.${{matrix.cmake_build_sub_release}}}}/cmake-${{matrix.cmake_build}}.${{matrix.cmake_build_sub_release}}.${{matrix.cmake_build_sub_version}}-Linux-x86_64.sh
           sudo mv cmake-${{matrix.cmake_build}}.${{matrix.cmake_build_sub_release}}.${{matrix.cmake_build_sub_version}}-Linux-x86_64.sh /opt
           cd /opt
           sudo chmod +x cmake-${{matrix.cmake_build}}.${{matrix.cmake_build_sub_release}}.${{matrix.cmake_build_sub_version}}-Linux-x86_64.sh
@@ -61,7 +61,7 @@ jobs:
       
       - name: Reintsall CMake
         run: |
-          wget https://cmake.org/files/v${{matrix.cmake_runtime}}/cmake-${{matrix.cmake_runtime}}.${{matrix.cmake_runtime_sub_release}}.${{matrix.cmake_runtime_sub_version}}-Linux-x86_64.sh
+          wget https://cmake.org/files/v${{matrix.cmake_runtime}}.${{matrix.cmake_runtime_sub_release}}/cmake-${{matrix.cmake_runtime}}.${{matrix.cmake_runtime_sub_release}}.${{matrix.cmake_runtime_sub_version}}-Linux-x86_64.sh
           sudo mv cmake-${{matrix.cmake_runtime}}.${{matrix.cmake_runtime_sub_release}}.${{matrix.cmake_runtime_sub_version}}-Linux-x86_64.sh /opt
           cd /opt
           sudo chmod +x cmake-${{matrix.cmake_runtime}}.${{matrix.cmake_runtime_sub_release}}.${{matrix.cmake_runtime_sub_version}}-Linux-x86_64.sh
