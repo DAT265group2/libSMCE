@@ -41,16 +41,16 @@ jobs:
             - name: CMake configure
               run: |
                   export BOOST_ROOT="$(pwd)/boost_root"
-                  mkdir build
-                  cmake -S ./ -B ./build
+                  mkdir ${env.build_dir}
+                  cmake -S ./ -B ${env.build_dir}
                   
             - name: CMake build
               run: |
-                  cmake --build ./build
+                  cmake --build ${env.build_dir}
               
             - name: Run libSMCE & SMCE_Tests
               run: |
-                 cmake --build ./build --target SMCE_Tests
+                 cmake --build ${env.build_dir} --target SMCE_Tests
              
             - name: Unistall cmake
               run: |
@@ -68,5 +68,5 @@ jobs:
                
             - name: Run tests
               run: |
-                  cd /home/runner/work/libSMCE/libSMCE/build/test 
+                  cd ${env.build_dir}/test 
                   ctest
