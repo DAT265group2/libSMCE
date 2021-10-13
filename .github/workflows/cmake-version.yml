@@ -6,7 +6,7 @@ jobs:
     strategy:
       matrix:
         cmake_build: [3.16]
-        cmake_build_sub_version: [0]
+        cmake_build_sub_version: [9]
         cmake_runtime: [3.12]
         cmake_runtime_sub_version: [0]
     env:
