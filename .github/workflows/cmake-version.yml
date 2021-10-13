@@ -26,7 +26,7 @@ jobs:
 
       - name: Install CMake build minimum version
         run: |
-          sudo apt remove cmake cmake-data
+          sudo apt-get remove cmake cmake-data
           mkdir /opt
           wget https://cmake.org/files/v${{matrix.cmake_build}}/cmake-${{matrix.cmake_build}}.0-Linux-x86_64.sh
           sudo mv cmake-${{matrix.cmake_build}}.0-Linux-x86_64.sh /opt
