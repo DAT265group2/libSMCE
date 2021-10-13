@@ -41,17 +41,13 @@ jobs:
         run: |
           cd /home/runner/work/libSMCE/libSMCE
           export BOOST_ROOT="${pwd}/boost_root"
-          cmake -G Ninja \
-            -DSMCE_BUILD_SHARED=On \
-            -DSMCE_BUILD_STATIC=On \
-            -DSMCE_CXXRT_LINKING=SHARED \
-            -DSMCE_BOOST_LINKING=SHARED \
-            -DSMCE_ARDRIVO_MQTT=On \
-            -DSMCE_MOSQUITTO_LINKING=SHARED \
-            -DSMCE_ARDRIVO_OV767X=On \
-            -S ./ -B ./build
           mkdir ${build_dir}
-          cmake -S ./ -B ${build_dir}
+          cmake -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DSMCE_CXXRT_LINKING=STATIC \
+            -DSMCE_BOOST_LINKING=STATIC \
+            -DSMCE_OPENSSL_LINKING=STATIC \
+            -S ./ -B ${build_dir}
 
       - name: CMake build
         run: |
