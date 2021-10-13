@@ -1,70 +1,72 @@
-name: runtime cmake version check
+name: runtime CMake version
 on: [push, pull_request]
 jobs:
-    minimum-version-check:
-        runs-on: ubuntu-latest
-        strategy:
-            matrix:
-                cmake_newer: [3.16]
-                cmake_older: [3.12]
-        env:
-            cmake_newer: ${{ matrix.cmake_newer }} 
-            cmake_older: ${{ matrix.cmake_older }}
-            CC: ${{ matrix.compiler.cc }}
-            CXX: ${{ matrix.compiler.cxx }} 
-            build_dir: build
-           
-        steps:  
-            - name: Checkout code
-              uses: actions/checkout@v2
-            
-            - name: Check dependencies
-              run: |
-                  cmake --version
-                  sudo apt-get update 
-                  sudo apt-get install -y curl wget git ninja-build g++ libboost-all-dev libssl-dev
-                  cmake --version
-                  
-            - name: Install different versions of cmake
-              run: |
-                  wget http://www.cmake.org/files/v${{ matrix.cmake_newer }}/cmake-${{ matrix.cmake_newer }}.0-Linux-x86_64.tar.gz
-                  sudo tar -xzvf cmake-${{ matrix.cmake_newer }}.0-Linux-x86_64.tar.gz -C /usr/local/bin
-                  cd /usr/local/bin/cmake-${{ matrix.cmake_newer }}.0-Linux-x86_64/
-                  echo 'export PATH=$PATH:$(pwd)/bin'>> ~/.bashrc
-                  source ~/.bashrc
-                  cmake --version
-              
-            - name: CMake configure
-              run: |
-                  export BOOST_ROOT="$(pwd)/boost_root"
-                  mkdir ${build_dir}
-                  cmake -S ./ -B ${build_dir}
-                  
-            - name: CMake build
-              run: |
-                  cmake --build ${build_dir}
-              
-            - name: Run libSMCE & SMCE_Tests
-              run: |
-                 cmake --build ${build_dir} --target SMCE_Tests
-             
-            - name: Unistall cmake
-              run: |
-                cd /usr/local/bin/
-                sudo rm -r cmake-${{ matrix.cmake_newer }}.0-Linux-x86_64
-                
-            - name: Reinstall cmake
-              run: |
-                  wget http://www.cmake.org/files/v${{ matrix.cmake_older }}/cmake-${{ matrix.cmake_older }}.0-Linux-x86_64.tar.gz
-                  sudo tar -xzvf cmake-${{ matrix.cmake_older }}.0-Linux-x86_64.tar.gz -C /usr/local/bin
-                  cd /usr/local/bin/cmake-${{ matrix.cmake_older }}.0-Linux-x86_64/
-                  echo 'export PATH=$PATH:${pwd}/bin'>> ~/.bashrc
-                  source ~/.bashrc
-                  cmake --version
-               
-            - name: Run tests
-              run: |
-                  echo ${pwd}
-                  cd ${build_dir}
-                  echo ${pwd}
-                  ctest
+  minimum-runtime-cmake-version:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        cmake_build:[3.16]
+        cmake_runtime:[3.12]
+
+    env:
+      cmake_build: ${{matrix.cmake_build}}
+      cmake_runtime: ${{matrix.cmake_runtime}}
+      build_dir: build
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Check dependencies
+        run: |
+          pwd
+          cmake --version
+          sudo apt-get update
+          sudo apt-get install -y crul wget git ninja-build g++ libboost-all-dev libssl-dev
+
+      - name: Install CMake build minimum version
+        run: |
+          sudo apt remove cmake cmake-data
+          mkdir /opt
+          wget https://cmake.org/files/v${{matrix.cmake_build}}/cmake-${{matrix.cmake_build}}.0-Linux-x86_64.sh
+          sudo mv cmake-${{matrix.cmake_build}}.0-Linux-x86_64.sh /opt
+          cd /opt
+          sudo chmod +x cmake-${{matrix.cmake_build}}.0-Linux-x86_64.sh
+          sudo bash ./cmake-${{matrix.cmake_build}}.0-Linux-x86_64.sh
+          sudo ln -s /opt/cmake-${{matrix.cmake_build}}.0-Linux-x86_64.sh/bin/* /usr/local/bin
+          cmake --version
+          pwd
+
+      - name: CMake configuration
+        run: |
+          export BOOST_ROOT="${pwd}/boost_root"
+          mkdir ${build_dir}
+          cmake -S ./ -B ${build_dir}
+
+      - name: CMake build
+        run: |
+          cmake --build ${build_dir}
+
+      - name: Run libSMCE&SMCE_Tests target
+        run: |
+          cmake --build ${build_dir} --target SMCE_Tests
+      
+      - name: Reintsall CMake
+        run: |
+          pwd
+          sudo rm -r /opt
+          mkdir /opt
+          wget https://cmake.org/files/v${{matrix.cmake_runtime}}/cmake-${{matrix.cmake_runtime}}.0-Linux-x86_64.sh
+          sudo mv cmake-${{matrix.cmake_runtime}}.0-Linux-x86_64.sh /opt
+          cd /opt
+          sudo chmod +x cmake-${{matrix.cmake_runtime}}.0-Linux-x86_64.sh
+          sudo bash ./cmake-${{matrix.cmake_runtime}}.0-Linux-x86_64.sh
+          sudo ln -s /opt/cmake-${{matrix.cmake_runtime}}.0-Linux-x86_64.sh/bin/* /usr/local/bin
+          cmake --version
+          pwd
+
+      - name: Runtime tests
+        run: |
+          pwd
+          cd ${build_dir}/test
+          ctest
