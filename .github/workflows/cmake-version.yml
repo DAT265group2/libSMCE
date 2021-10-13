@@ -5,8 +5,8 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        cmake_build:[3.16]
-        cmake_runtime:[3.12]
+        cmake_build: [3.16]
+        cmake_runtime: [3.12]
 
     env:
       cmake_build: ${{matrix.cmake_build}}
