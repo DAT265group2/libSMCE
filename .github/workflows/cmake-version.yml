@@ -10,6 +10,8 @@ jobs:
         cmake_runtime: [3.12]
         cmake_runtime_sub_version: [0]
     env:
+      CC: gcc-10
+      CXX: g++-10
       build_dir: build
 
     steps:
