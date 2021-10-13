@@ -12,7 +12,6 @@ jobs:
     env:
       CC: gcc-10
       CXX: g++-10
-      build_dir: build
 
     steps:
       - name: Checkout code
@@ -41,24 +40,22 @@ jobs:
         run: |
           cd /home/runner/work/libSMCE/libSMCE
           export BOOST_ROOT="${pwd}/boost_root"
-          mkdir ${build_dir}
+          
+          mkdir build
           cmake -G Ninja \
-            -DSMCE_BUILD_SHARED=On \
-            -DSMCE_BUILD_STATIC=On \
-            -DSMCE_CXXRT_LINKING=SHARED \
-            -DSMCE_BOOST_LINKING=SHARED \
-            -DSMCE_ARDRIVO_MQTT=On \
-            -DSMCE_MOSQUITTO_LINKING=SHARED \
-            -DSMCE_ARDRIVO_OV767X=On \
-            -S ./ -B ${build_dir}
+            -DCMAKE_BUILD_TYPE=Release \
+            -DSMCE_CXXRT_LINKING=STATIC \
+            -DSMCE_BOOST_LINKING=STATIC \
+            -DSMCE_OPENSSL_LINKING=STATIC \
+            -S ./ -B ./build
 
       - name: CMake build
         run: |
-          cmake --build ${build_dir}
+          cmake --build ./build
 
       - name: Run libSMCE&SMCE_Tests target
         run: |
-          cmake --build ${build_dir} --target SMCE_Tests
+          cmake --build ./build --target SMCE_Tests
       
       - name: Reintsall CMake
         run: |
@@ -76,5 +73,6 @@ jobs:
       - name: Runtime tests
         run: |
           pwd
-          cd ${build_dir}/test
+          cd /home/runner/work/libSMCE/libSMCE
+          cd ./build/test
           ctest
