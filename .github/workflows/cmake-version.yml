@@ -33,7 +33,8 @@ jobs:
           sudo chmod +x cmake-${{matrix.cmake_build}}.0-Linux-x86_64.sh
           sudo bash ./cmake-${{matrix.cmake_build}}.0-Linux-x86_64.sh --skip-license
           sudo cp /opt/bin/{cmake,ccmake,cmake-gui,cpack,ctest} /usr/local/bin
-          sudo cp -r /opt/share/{aclocal, applications, cmake-3.16, icons, mime} /usr/local/share
+          ls
+          sudo cp -r /opt/share/{aclocal,applications,cmake-3.16,icons,mime} /usr/local/share
           sudo cp -r /opt/man/{man1, man7} /usr/local/man
           sudo cp -r  /opt/doc/cmake /usr/local/doc
           cmake --version
