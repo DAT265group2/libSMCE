@@ -19,7 +19,6 @@ jobs:
 
       - name: Check dependencies
         run: |
-          pwd
           cmake --version
           sudo apt-get update
           sudo apt-get install -y curl wget git ninja-build g++ libboost-all-dev libssl-dev
@@ -27,21 +26,23 @@ jobs:
       - name: Install CMake build minimum version
         run: |
           cd /usr/local/bin
-          ls
           rm cmake ccmake cmake-gui cpack ctest
           wget https://cmake.org/files/v${{matrix.cmake_build}}/cmake-${{matrix.cmake_build}}.0-Linux-x86_64.sh
           sudo mv cmake-${{matrix.cmake_build}}.0-Linux-x86_64.sh /opt
           cd /opt
           sudo chmod +x cmake-${{matrix.cmake_build}}.0-Linux-x86_64.sh
           sudo bash ./cmake-${{matrix.cmake_build}}.0-Linux-x86_64.sh --skip-license
-          cd /opt/bin
-          sudo cp cmake ccmake cmake-gui cpack ctest /usr/local/bin
+          sudo cp /opt/bin/{cmake,ccmake,cmake-gui,cpack,ctest} /usr/local/bin
+          sudo cp -r /opt/share/{aclocal, applications, cmake-3.16, icons, mime} /usr/local/share
+          sudo cp -r /opt/man/{man1, man7} /usr/local/man
+          sudo cp -r  /opt/doc/cmake /usr/local/doc
           cmake --version
           pwd
           ls
 
       - name: CMake configuration
         run: |
+          cd /home/runner/work/libSMCE/libSMCE
           export BOOST_ROOT="${pwd}/boost_root"
           mkdir ${build_dir}
           cmake -S ./ -B ${build_dir}
