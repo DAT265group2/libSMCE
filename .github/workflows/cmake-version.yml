@@ -27,7 +27,6 @@ jobs:
       - name: Install CMake build minimum version
         run: |
           sudo apt-get remove cmake cmake-data
-          mkdir /opt
           wget https://cmake.org/files/v${{matrix.cmake_build}}/cmake-${{matrix.cmake_build}}.0-Linux-x86_64.sh
           sudo mv cmake-${{matrix.cmake_build}}.0-Linux-x86_64.sh /opt
           cd /opt
@@ -36,6 +35,7 @@ jobs:
           sudo ln -s /opt/cmake-${{matrix.cmake_build}}.0-Linux-x86_64.sh/bin/* /usr/local/bin
           cmake --version
           pwd
+          ls
 
       - name: CMake configuration
         run: |
@@ -54,8 +54,7 @@ jobs:
       - name: Reintsall CMake
         run: |
           pwd
-          sudo rm -r /opt
-          mkdir /opt
+          sudo rm -r /opt/
           wget https://cmake.org/files/v${{matrix.cmake_runtime}}/cmake-${{matrix.cmake_runtime}}.0-Linux-x86_64.sh
           sudo mv cmake-${{matrix.cmake_runtime}}.0-Linux-x86_64.sh /opt
           cd /opt
