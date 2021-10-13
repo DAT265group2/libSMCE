@@ -22,7 +22,7 @@ jobs:
         run: |
           cmake --version
           sudo apt-get update
-          sudo apt-get install -y curl wget git ninja-build g++-10 libboost-all-dev libssl-dev mosquitto-devel
+          sudo apt-get install -y curl wget git ninja-build g++-10 libboost-all-dev libssl-dev libmosquitto-dev
 
       - name: Install CMake build minimum version
         run: |
