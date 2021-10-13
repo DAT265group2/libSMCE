@@ -7,7 +7,7 @@ jobs:
       fail-fast: false
       matrix:
         cmake_build: [ 3 ]
-        cmake_build_sub_release: [ 16, 17, 18, 19 ]
+        cmake_build_sub_release: [ 19 ]
         cmake_build_sub_version: [ 5 ]
         cmake_runtime: [ 3 ]
         cmake_runtime_sub_release: [ 12 ]
@@ -80,6 +80,9 @@ jobs:
       - name: Runtime tests
         run: |
           pwd
+          ls
           cd /home/runner/work/libSMCE/libSMCE
           cd ./build/test
+          pwd
+          ls
           ctest
