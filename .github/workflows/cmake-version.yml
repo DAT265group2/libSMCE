@@ -26,8 +26,9 @@ jobs:
 
       - name: Install CMake build minimum version
         run: |
-          cd /usr/local/bin/cmake
+          cd /usr/local/bin
           ls
+          rm cmake ccmake cmake-gui cpack ctest
           wget https://cmake.org/files/v${{matrix.cmake_build}}/cmake-${{matrix.cmake_build}}.0-Linux-x86_64.sh
           sudo mv cmake-${{matrix.cmake_build}}.0-Linux-x86_64.sh /opt
           cd /opt
