@@ -14,6 +14,10 @@ jobs:
     env:
       CC: gcc-10
       CXX: g++-10
+      current_build_cmake_version_short: ${{matrix.cmake_build}}.${{matrix.cmake_build_sub_release}}
+      current_build_cmake_version_complete: ${{matrix.cmake_build}}.${{matrix.cmake_build_sub_release}}.${{matrix.cmake_build_sub_version}}
+      current_runtime_cmake_version_short: ${{matrix.cmake_runtime}}.${{matrix.cmake_runtime_sub_release}}
+      current_runtime_cmake_version_complete: ${{matrix.cmake_runtime}}.${{matrix.cmake_runtime_sub_release}}.${{matrix.cmake_runtime_sub_version}}
 
     steps:
       - name: Checkout code
@@ -27,13 +31,13 @@ jobs:
 
       - name: Install CMake build minimum version
         run: |
-          wget https://cmake.org/files/v${{matrix.cmake_build}}.${{matrix.cmake_build_sub_release}}/cmake-${{matrix.cmake_build}}.${{matrix.cmake_build_sub_release}}.${{matrix.cmake_build_sub_version}}-Linux-x86_64.sh
-          sudo mv cmake-${{matrix.cmake_build}}.${{matrix.cmake_build_sub_release}}.${{matrix.cmake_build_sub_version}}-Linux-x86_64.sh /opt
+          wget https://cmake.org/files/v${current_build_cmake_version_short}/cmake-${current_build_cmake_version_complete}-Linux-x86_64.sh
+          sudo mv cmake-${current_build_cmake_version_complete}-Linux-x86_64.sh /opt
           cd /opt
-          sudo chmod +x cmake-${{matrix.cmake_build}}.${{matrix.cmake_build_sub_release}}.${{matrix.cmake_build_sub_version}}-Linux-x86_64.sh
-          sudo bash ./cmake-${{matrix.cmake_build}}.${{matrix.cmake_build_sub_release}}.${{matrix.cmake_build_sub_version}}-Linux-x86_64.sh --skip-license
+          sudo chmod +x cmake-${current_build_cmake_version_complete}-Linux-x86_64.sh
+          sudo bash ./cmake-${current_build_cmake_version_complete}-Linux-x86_64.sh --skip-license
           sudo cp /opt/bin/{cmake,ccmake,cmake-gui,cpack,ctest} /usr/local/bin
-          sudo cp -r /opt/share/{aclocal,applications,cmake-${{matrix.cmake_build}},icons,mime} /usr/local/share
+          sudo cp -r /opt/share/{aclocal,applications,cmake-${current_build_cmake_version_short},icons,mime} /usr/local/share
           sudo cp -r /opt/man/{man1,man7} /usr/local/man
           sudo cp -r  /opt/doc/cmake /usr/local/doc
           cmake --version
@@ -61,13 +65,13 @@ jobs:
       
       - name: Reintsall CMake
         run: |
-          wget https://cmake.org/files/v${{matrix.cmake_runtime}}.${{matrix.cmake_runtime_sub_release}}/cmake-${{matrix.cmake_runtime}}.${{matrix.cmake_runtime_sub_release}}.${{matrix.cmake_runtime_sub_version}}-Linux-x86_64.sh
-          sudo mv cmake-${{matrix.cmake_runtime}}.${{matrix.cmake_runtime_sub_release}}.${{matrix.cmake_runtime_sub_version}}-Linux-x86_64.sh /opt
+          wget https://cmake.org/files/v${current_runtime_cmake_version_short}/cmake-${current_runtime_cmake_version_complete}-Linux-x86_64.sh
+          sudo mv cmake-${current_runtime_cmake_version_complete}-Linux-x86_64.sh /opt
           cd /opt
-          sudo chmod +x cmake-${{matrix.cmake_runtime}}.${{matrix.cmake_runtime_sub_release}}.${{matrix.cmake_runtime_sub_version}}-Linux-x86_64.sh
-          sudo bash ./cmake-${{matrix.cmake_runtime}}.${{matrix.cmake_runtime_sub_release}}.${{matrix.cmake_runtime_sub_version}}-Linux-x86_64.sh --skip-license
+          sudo chmod +x cmake-${current_runtime_cmake_version_complete}-Linux-x86_64.sh
+          sudo bash ./cmake-${current_runtime_cmake_version_complete}-Linux-x86_64.sh --skip-license
           sudo cp /opt/bin/{cmake,ccmake,cmake-gui,cpack,ctest} /usr/local/bin
-          sudo cp -r /opt/share/{aclocal,applications,cmake-${{matrix.cmake_runtime}},icons,mime} /usr/local/share
+          sudo cp -r /opt/share/{aclocal,applications,cmake-${current_runtime_cmake_version_short},icons,mime} /usr/local/share
           sudo cp -r /opt/man/{man1,man7} /usr/local/man
           sudo cp -r  /opt/doc/cmake /usr/local/doc
           cmake --version
