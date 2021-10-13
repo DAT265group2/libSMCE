@@ -9,7 +9,9 @@ jobs:
         cmake_build_sub_version: [0]
         cmake_runtime: [3.12]
         cmake_runtime_sub_version: [0]
-
+      env:
+        build_dir: build
+        
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
