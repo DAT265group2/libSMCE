@@ -12,7 +12,7 @@ jobs:
         cmake_runtime: [ 3 ]
         cmake_runtime_sub_release: [ 12 ]
         cmake_runtime_sub_version: [ 0 ]
-        boost_version: [ 1.74.0.3ubuntu5 ]
+        boost_version: [ 1.74.0 ]
     env:
       CC: gcc-10
       CXX: g++-10
