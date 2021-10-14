@@ -29,6 +29,7 @@ jobs:
         run: |
           cmake --version
           sudo apt-get update
+          lsb_release -a
           apt-cache show libboost-all-dev
           sudo apt-get install -y curl wget git ninja-build g++-10 libssl-dev libboost-dev=${{matrix.boost_version}} libmosquitto-dev
           grep BOOST_LIB_VERSION /usr/include/boost/version.hpp
