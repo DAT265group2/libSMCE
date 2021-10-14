@@ -12,7 +12,7 @@ jobs:
         cmake_runtime: [ 3 ]
         cmake_runtime_sub_release: [ 12 ]
         cmake_runtime_sub_version: [ 0 ]
-        boost_version: [1.74.0]
+        boost_version: [ 1.74.0.3ubuntu5 ]
     env:
       CC: gcc-10
       CXX: g++-10
@@ -27,10 +27,14 @@ jobs:
 
       - name: Check dependencies
         run: |
-          grep BOOST_LIB_VERSION /usr/include/boost/version.hpp
           cmake --version
           sudo apt-get update
-          sudo apt-get install -y curl wget git ninja-build g++-10 libboost-all-dev libssl-dev libmosquitto-dev
+          sudo apt-get install -y curl wget git ninja-build g++-10 libssl-dev libmosquitto-dev
+          
+      - name: Install boost
+        run: |
+          sudo apt-get install libboost-all-dev=${{matrix.boost_version}}
+          grep BOOST_LIB_VERSION /usr/include/boost/version.hpp
 
       - name: Install CMake build minimum version
         run: |
