@@ -82,7 +82,7 @@ jobs:
           pwd
           ls
           cd /home/runner/work/libSMCE/libSMCE
-          cd ./build
+          cd ./build/test
           pwd
           ls
           ctest
