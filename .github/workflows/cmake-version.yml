@@ -11,7 +11,7 @@ jobs:
         cmake_build_sub_version: [ 5 ]
         cmake_runtime: [ 3 ]
         cmake_runtime_sub_release: [ 12, 13, 14, 15, 16, 17, 18, 19 ]
-        cmake_runtime_sub_version: [ 5 ]
+        cmake_runtime_sub_version: [ 4 ]
         boost_version: [ 1.74.0 ]
     env:
       CC: gcc-10
@@ -58,9 +58,13 @@ jobs:
         run: |
           cd /home/runner/work/libSMCE/libSMCE
           export BOOST_ROOT="${pwd}/boost_root"
-          
           mkdir build
-          cmake -S ./ -B build
+          cmake -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DSMCE_CXXRT_LINKING=STATIC \
+            -DSMCE_BOOST_LINKING=STATIC \
+            -DSMCE_OPENSSL_LINKING=STATIC \
+            -S ./ -B ./build
             
       - name: CMake build
         run: |
@@ -70,7 +74,7 @@ jobs:
         run: |
           cmake --build build --target SMCE_Tests
       
-      - name: Reintsall CMake
+      - name: Reintsall CMake runtime minimum version
         run: |
           wget https://cmake.org/files/v${current_runtime_cmake_version_short}/cmake-${current_runtime_cmake_version_complete}-Linux-x86_64.sh
           sudo mv cmake-${current_runtime_cmake_version_complete}-Linux-x86_64.sh /opt
@@ -85,10 +89,5 @@ jobs:
 
       - name: Runtime tests
         run: |
-          pwd
-          ls
-          cd /home/runner/work/libSMCE/libSMCE
-          cd build/test
-          pwd
-          ls
+          cd /home/runner/work/libSMCE/libSMCE/build/test
           ctest
