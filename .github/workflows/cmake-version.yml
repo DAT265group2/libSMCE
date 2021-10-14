@@ -7,11 +7,11 @@ jobs:
       fail-fast: false
       matrix:
         cmake_build: [ 3 ]
-        cmake_build_sub_release: [ 19 ]
+        cmake_build_sub_release: [ 16, 17, 18, 19 ]
         cmake_build_sub_version: [ 5 ]
         cmake_runtime: [ 3 ]
-        cmake_runtime_sub_release: [ 12 ]
-        cmake_runtime_sub_version: [ 0 ]
+        cmake_runtime_sub_release: [ 12, 13, 14, 15, 16, 17, 18, 19 ]
+        cmake_runtime_sub_version: [ 5 ]
         boost_version: [ 1.74.0 ]
     env:
       CC: gcc-10
