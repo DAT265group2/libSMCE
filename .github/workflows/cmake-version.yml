@@ -49,13 +49,15 @@ jobs:
           export BOOST_ROOT="${pwd}/boost_root"
           
           mkdir build
-          cmake -G Ninja test \
-            -DCMAKE_BUILD_TYPE=Release \
-            -DSMCE_CXXRT_LINKING=STATIC \
-            -DSMCE_BOOST_LINKING=STATIC \
-            -DSMCE_OPENSSL_LINKING=STATIC \
+          cmake -G Ninja \
+            -DCMAKE_BUILD_TYPE=Debug \
+            -DSMCE_COVERAGE=On \
+            -DSMCE_BUILD_STATIC=Off \
+            -DSMCE_CXXRT_LINKING=SHARED \
+            -DSMCE_BOOST_LINKING=SHARED \
+            -DSMCE_OPENSSL_LINKING=SHARED \
             -S ./ -B ./build
-
+            
       - name: CMake build
         run: |
           cmake --build ./build
