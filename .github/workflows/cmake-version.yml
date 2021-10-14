@@ -35,7 +35,7 @@ jobs:
       - name: Install boost
         if: steps.cache-boost.outputs.cache-hit != 'true'
         run: |
-          ci/build-static-boost.sh ${{ matrix.boost.version }}
+          ci/build-static-boost.sh ${{ matrix.boost_version }}
           grep BOOST_LIB_VERSION /usr/include/boost/version.hpp
 
       - name: Check dependencies
