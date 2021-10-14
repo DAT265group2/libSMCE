@@ -33,7 +33,7 @@ jobs:
           ./bootstrap.sh --prefix=/usr
           ./b2
           sudo ./b2 install
-          grep BOOST_VERSION /usr/include/boost/version.hpp.
+          grep BOOST_VERSION /usr/include/boost/version.hpp
 
       - name: Check dependencies
         run: |
