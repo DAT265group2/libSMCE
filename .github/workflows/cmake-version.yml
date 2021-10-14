@@ -29,11 +29,7 @@ jobs:
         run: |
           cmake --version
           sudo apt-get update
-          sudo apt-get install -y curl wget git ninja-build g++-10 libssl-dev libmosquitto-dev
-          
-      - name: Install boost
-        run: |
-          sudo apt-get install libboost-all-dev=${{matrix.boost_version}}
+          sudo apt-get install -y curl wget git ninja-build g++-10 libssl-dev libboost-all-dev=${{matrix.boost_version}} libmosquitto-dev
           grep BOOST_LIB_VERSION /usr/include/boost/version.hpp
 
       - name: Install CMake build minimum version
