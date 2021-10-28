@@ -172,14 +172,14 @@ TEST_CASE("Valid plugin dependency processing", "[Plugin]") {
     smce::Toolchain tc{SMCE_PATH};
     REQUIRE(!tc.check_suitable_environment());
 
-    std::vector<std::string> manifests_name = {"A","B","C","D","E","F","G"};
+    std::vector<std::string> manifests_name = {"A", "B", "C", "D", "E", "F", "G"};
     std::vector<std::vector<std::string>> manifests_deps = {{}, {"C", "D"}, {"E", "F"},
-                                                           {"F", "G"}, {},{},{}};
+                                                           {"F", "G"}, {}, {}, {}};
     std::vector<smce::PluginManifest> plugins;
 
-    for(int i = 0; i < manifests_name.size(); i++)
+    for (int i = 0; i < manifests_name.size(); i++)
     {
-        smce::PluginManifest pm{
+        smce::PluginManifest pm {
             .name = manifests_name[i],
             .version = "0",
             .depends = manifests_deps[i],
@@ -188,7 +188,7 @@ TEST_CASE("Valid plugin dependency processing", "[Plugin]") {
         };
         plugins.push_back(pm);
     }
-    smce::SketchConfig skc{
+    smce::SketchConfig skc {
         "arduino:avr:nano",
         {},
         {},
@@ -209,13 +209,12 @@ TEST_CASE("Invalid plugin dependency processing (cycle check)", "[Plugin]") {
     smce::Toolchain tc{SMCE_PATH};
     REQUIRE(!tc.check_suitable_environment());
 
-    std::vector<std::string> manifests_name = {"A","B","C"};
-    std::vector<std::vector<std::string>> manifests_deps = {{"B"},{"C"},{"A"}};
+    std::vector<std::string> manifests_name = {"A", "B", "C"};
+    std::vector<std::vector<std::string>> manifests_deps = {{"B"}, {"C"}, {"A"}};
     std::vector<smce::PluginManifest> plugins;
 
-    for(int i = 0; i < manifests_name.size(); i++)
-    {
-        smce::PluginManifest pm{
+    for (int i = 0; i < manifests_name.size(); i++) {
+        smce::PluginManifest pm {
             .name = manifests_name[i],
             .version = "0",
             .depends = manifests_deps[i],
@@ -224,7 +223,7 @@ TEST_CASE("Invalid plugin dependency processing (cycle check)", "[Plugin]") {
         };
         plugins.push_back(pm);
     }
-    smce::SketchConfig skc{
+    smce::SketchConfig skc {
         "arduino:avr:nano",
         {},
         {},
@@ -236,13 +235,13 @@ TEST_CASE("Invalid plugin dependency processing (cycle check)", "[Plugin]") {
 
     const auto ec = tc.compile(sk);
     std::size_t found = 0;
-    if(ec) {
+    if (ec) {
         std::string s = std::move(tc.build_log().second);
         std::cerr << s;
         found = s.find("Plugin dependency cycle detected!");
     }
     REQUIRE(ec);
-    REQUIRE(found!=std::string::npos);
+    REQUIRE(found != std::string::npos);
 }
 
 #if SMCE_ARDRIVO_MQTT
