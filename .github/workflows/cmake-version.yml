@@ -90,4 +90,4 @@ jobs:
       - name: Runtime tests
         run: |
           cd /home/runner/work/libSMCE/libSMCE/build/test
-          ctest
+          ctest --output-on-error
