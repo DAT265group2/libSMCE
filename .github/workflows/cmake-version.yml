@@ -24,16 +24,6 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-      
-#      - name: Install boost
-#       run: |
-#          wget -O boost_1_74_0.tar.gz https://sourceforge.net/projects/boost/files/boost/1.74.0/boost_1_74_0.tar.gz/download
-#          tar xzvf boost_1_74_0.tar.gz
-#          cd boost_1_74_0/
-#          ./bootstrap.sh --prefix=/usr
-#          ./b2
-#          sudo ./b2 install
-#          grep BOOST_VERSION /usr/include/boost/version.hpp
 
       - name: Check dependencies
         run: |
