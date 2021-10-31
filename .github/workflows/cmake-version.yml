@@ -57,7 +57,7 @@ jobs:
       - name: CMake configuration
         run: |
           cd /home/runner/work/libSMCE/libSMCE
-          export BOOST_ROOT="${pwd}/boost_root"
+#          export BOOST_ROOT="${pwd}/boost_root"
           mkdir build
           cmake \
             -DCMAKE_BUILD_TYPE=Release \
