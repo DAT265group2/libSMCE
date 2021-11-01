@@ -1,0 +1,82 @@
+name: runtime CMake version
+on: [push, pull_request]
+jobs:
+  minimum-runtime-cmake-version:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        cmake_build: [ 3 ]
+        cmake_build_sub_release: [ 16, 17, 18, 19 ]
+        cmake_build_sub_version: [ 5 ]
+        cmake_runtime: [ 3 ]
+        cmake_runtime_sub_release: [ 12, 13, 14, 15, 16, 17, 18, 19 ]
+        cmake_runtime_sub_version: [ 4 ]
+        boost_version: [ 1.74.0 ]
+    env:
+      CC: gcc-10
+      CXX: g++-10
+      current_build_cmake_version_short: ${{matrix.cmake_build}}.${{matrix.cmake_build_sub_release}}
+      current_build_cmake_version_complete: ${{matrix.cmake_build}}.${{matrix.cmake_build_sub_release}}.${{matrix.cmake_build_sub_version}}
+      current_runtime_cmake_version_short: ${{matrix.cmake_runtime}}.${{matrix.cmake_runtime_sub_release}}
+      current_runtime_cmake_version_complete: ${{matrix.cmake_runtime}}.${{matrix.cmake_runtime_sub_release}}.${{matrix.cmake_runtime_sub_version}}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Check dependencies
+        run: |
+          cmake --version
+          sudo apt-get update
+          sudo apt-get install -y curl wget git ninja-build g++-10 libssl-dev libmosquitto-dev
+
+      - name: Install CMake build minimum version
+        run: |
+          wget https://cmake.org/files/v${current_build_cmake_version_short}/cmake-${current_build_cmake_version_complete}-Linux-x86_64.sh
+          sudo mv cmake-${current_build_cmake_version_complete}-Linux-x86_64.sh /opt
+          cd /opt
+          sudo chmod +x cmake-${current_build_cmake_version_complete}-Linux-x86_64.sh
+          sudo bash ./cmake-${current_build_cmake_version_complete}-Linux-x86_64.sh --skip-license
+          sudo cp /opt/bin/{cmake,ccmake,cmake-gui,cpack,ctest} /usr/local/bin
+          sudo cp -r /opt/share/{aclocal,applications,cmake-${current_build_cmake_version_short},icons,mime} /usr/local/share
+          sudo cp -r /opt/man/{man1,man7} /usr/local/man
+          sudo cp -r  /opt/doc/cmake /usr/local/doc
+          cmake --version
+
+      - name: CMake configuration
+        run: |
+          cd /home/runner/work/libSMCE/libSMCE
+          mkdir build
+          cmake \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DSMCE_CXXRT_LINKING=STATIC \
+            -DSMCE_BOOST_LINKING=STATIC \
+            -DSMCE_OPENSSL_LINKING=STATIC \
+            -S ./ -B ./build
+            
+      - name: CMake build
+        run: |
+          cmake --build build
+
+      - name: Run libSMCE&SMCE_Tests target
+        run: |
+          cmake --build build --target SMCE_Tests
+      
+      - name: Reintsall CMake runtime minimum version
+        run: |
+          wget https://cmake.org/files/v${current_runtime_cmake_version_short}/cmake-${current_runtime_cmake_version_complete}-Linux-x86_64.sh
+          sudo mv cmake-${current_runtime_cmake_version_complete}-Linux-x86_64.sh /opt
+          cd /opt
+          sudo chmod +x cmake-${current_runtime_cmake_version_complete}-Linux-x86_64.sh
+          sudo bash ./cmake-${current_runtime_cmake_version_complete}-Linux-x86_64.sh --skip-license
+          sudo cp /opt/bin/{cmake,ccmake,cmake-gui,cpack,ctest} /usr/local/bin
+          sudo cp -r /opt/share/{aclocal,applications,cmake-${current_runtime_cmake_version_short},icons,mime} /usr/local/share
+          sudo cp -r /opt/man/{man1,man7} /usr/local/man
+          sudo cp -r  /opt/doc/cmake /usr/local/doc
+          cmake --version
+
+      - name: Runtime tests
+        run: |
+          cd /home/runner/work/libSMCE/libSMCE/build/test
+          ctest --output-on-error
