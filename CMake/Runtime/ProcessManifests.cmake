@@ -14,9 +14,9 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 #
-cmake_policy(VERSION 3.12)
+cmake_policy (VERSION 3.12)
 if (CMAKE_VERSION VERSION_GREATER_EQUAL 3.21)
-  cmake_policy(SET CMP0121 NEW)
+  cmake_policy (SET CMP0121 NEW)
 endif ()
 
 function (process_manifests)
