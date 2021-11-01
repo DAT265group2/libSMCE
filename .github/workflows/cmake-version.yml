@@ -53,7 +53,7 @@ jobs:
             -DSMCE_BOOST_LINKING=SOURCE\
             -DSMCE_OPENSSL_LINKING=STATIC \
             -S ./ -B ./build
-          ls build
+          ls build/test
             
       - name: CMake build
         run: |
