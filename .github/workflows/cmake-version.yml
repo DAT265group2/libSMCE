@@ -33,14 +33,8 @@ jobs:
       - name: Install CMake build minimum version
         run: |
           wget https://cmake.org/files/v${current_build_cmake_version_short}/cmake-${current_build_cmake_version_complete}-Linux-x86_64.sh
-          sudo mv cmake-${current_build_cmake_version_complete}-Linux-x86_64.sh /opt
-          cd /opt
           sudo chmod +x cmake-${current_build_cmake_version_complete}-Linux-x86_64.sh
-          sudo bash ./cmake-${current_build_cmake_version_complete}-Linux-x86_64.sh --skip-license
-          sudo cp /opt/bin/{cmake,ccmake,cmake-gui,cpack,ctest} /usr/local/bin
-          sudo cp -r /opt/share/{aclocal,applications,cmake-${current_build_cmake_version_short},icons,mime} /usr/local/share
-          sudo cp -r /opt/man/{man1,man7} /usr/local/man
-          sudo cp -r  /opt/doc/cmake /usr/local/doc
+          sudo bash ./cmake-${current_build_cmake_version_complete}-Linux-x86_64.sh --skip-license --prefix=/usr/local
           cmake --version
 
       - name: CMake configuration
@@ -66,14 +60,8 @@ jobs:
       - name: Reintsall CMake runtime minimum version
         run: |
           wget https://cmake.org/files/v${current_runtime_cmake_version_short}/cmake-${current_runtime_cmake_version_complete}-Linux-x86_64.sh
-          sudo mv cmake-${current_runtime_cmake_version_complete}-Linux-x86_64.sh /opt
-          cd /opt
           sudo chmod +x cmake-${current_runtime_cmake_version_complete}-Linux-x86_64.sh
-          sudo bash ./cmake-${current_runtime_cmake_version_complete}-Linux-x86_64.sh --skip-license
-          sudo cp /opt/bin/{cmake,ccmake,cmake-gui,cpack,ctest} /usr/local/bin
-          sudo cp -r /opt/share/{aclocal,applications,cmake-${current_runtime_cmake_version_short},icons,mime} /usr/local/share
-          sudo cp -r /opt/man/{man1,man7} /usr/local/man
-          sudo cp -r  /opt/doc/cmake /usr/local/doc
+          sudo bash ./cmake-${current_runtime_cmake_version_complete}-Linux-x86_64.sh --skip-license --prefix=/usr/local
           cmake --version
 
       - name: Runtime tests
