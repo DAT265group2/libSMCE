@@ -14,10 +14,15 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 #
+cmake_policy (VERSION 3.12)
+if (CMAKE_VERSION VERSION_GREATER_EQUAL 3.21)
+  cmake_policy (SET CMP0121 NEW)
+endif ()
 
 function (process_manifests)
   file (GLOB manifests "${CMAKE_SOURCE_DIR}/manifests/*.cmake")
 
+  # Load plugins from the manifests
   set (plugins)
   foreach (manifest ${manifests})
     message (DEBUG "Scanning manifest ${manifest}")
@@ -85,8 +90,99 @@ function (process_manifests)
     unset (PLUGIN_NAME)
   endforeach ()
 
-  # FIXME scan plugin dependencies, and sort the plugins list accordingly
+  # Depth first search
+  function (dfs SLIST VLIST VX1)
+    set (S_LIST "${${SLIST}}")
+    set (V_LIST "${${VLIST}}")
+    set (VX_1 "${${VX1}}")
 
+    list (REMOVE_ITEM V_LIST VISIT_${VX_1})
+    set (${VLIST} ${V_LIST} PARENT_SCOPE)
+
+    foreach (VX_2 ${PLUGIN_${VX_1}_DEPENDS})
+      set (I_VX_2)
+      list (FIND V_LIST VISIT_${VX_2} I_VX_2)
+
+      if (${I_VX_2} GREATER -1)
+        dfs (S_LIST V_LIST VX_2)
+      endif ()
+    endforeach ()
+
+    list (APPEND S_LIST ${VX_1})
+    set (${VLIST} ${V_LIST} PARENT_SCOPE)
+    set (${SLIST} ${S_LIST} PARENT_SCOPE)
+  endfunction ()
+
+  # Scan plugin dependencies and sort in reverse order
+  function (topological_sort PLUGIN_LIST)
+    # Clear the stack and output variable
+    set (VERTICES "${${PLUGIN_LIST}}")
+    set (STACK)
+    set (TSORT)
+    set (${PLUGIN_LIST})
+    set (VISIT_LIST)
+
+    # Add all vertices to a to-visit list
+    foreach (VX ${VERTICES})
+      list (APPEND VISIT_LIST VISIT_${VX})
+      # If vertex has no depends, place at beginning of list
+      if (NOT PLUGIN_${VX}_DEPENDS)
+        list (REMOVE_ITEM VERTICES ${VX})
+        list (INSERT VERTICES 0 ${VX})
+      endif ()
+    endforeach ()
+
+    # Start the dfs in topological sort
+    foreach (VX ${VERTICES})
+      set (I_VX)
+      list (FIND VISIT_LIST VISIT_${VX} I_VX)
+      if (${I_VX} GREATER -1)
+        dfs (STACK VISIT_LIST VX)
+      endif ()
+    endforeach ()
+
+    # Checking for cycles
+    set (IND 0)
+    list (LENGTH STACK STACK_LENGTH)
+
+    while (STACK_LENGTH GREATER 0)
+      # Stores the position of
+      # vertex in topological order
+      list (GET STACK -1 NEXT_VX)
+      list (REMOVE_AT STACK -1)
+      list (LENGTH STACK STACK_LENGTH)
+      set (${NEXT_VX}_POS ${IND})
+      math (EXPR IND "${IND}+1")
+      list (APPEND TSORT ${NEXT_VX})
+
+    endwhile ()
+
+    foreach (VX ${VERTICES})
+      foreach (VX_DEP ${PLUGIN_${VX}_DEPENDS})
+        if (NOT DEFINED ${VX}_POS)
+          set (FIRST 0)
+        else ()
+          set (FIRST ${${VX}_POS})
+        endif ()
+        if (NOT DEFINED ${VX_DEP}_POS)
+          set (SECOND 0)
+        else ()
+          set (SECOND ${${VX_DEP}_POS})
+        endif ()
+        if (FIRST GREATER SECOND)
+          message (FATAL_ERROR "Plugin dependency cycle detected!")
+        endif ()
+      endforeach ()
+    endforeach ()
+
+    # Reverse the list of depends and return
+    list (REVERSE TSORT)
+    set (${PLUGIN_LIST} ${TSORT} PARENT_SCOPE)
+  endfunction (topological_sort)
+
+  topological_sort (plugins)
+
+  # Process the plugins
   function (process_plugin plugin)
     macro (pass_through suff)
       if (DEFINED PLUGIN_${PLUGIN_NAME}_${suff})
@@ -156,9 +252,9 @@ function (process_manifests)
           file (ARCHIVE_EXTRACT INPUT "${ark${upatch}_path}" DESTINATION "${${patchu}root}")
         else ()
           execute_process (COMMAND "${CMAKE_COMMAND}" -E tar xf "${CMAKE_MATCH_1}" "${ark${upatch}_path}"
-              WORKING_DIRECTORY "${${patchu}root}"
-              RESULT_VARIABLE ark${upatch}_extract_result
-          )
+                  WORKING_DIRECTORY "${${patchu}root}"
+                  RESULT_VARIABLE ark${upatch}_extract_result
+                  )
           if (ark${upatch}_extract_result)
             message (FATAL_ERROR "[Plugin ${PLUGIN_NAME}] Failed to inflate${spatch} archive")
           endif ()
@@ -293,6 +389,7 @@ function (process_manifests)
     if (sources)
       message (DEBUG "[Plugin ${PLUGIN_NAME}] Declaring OBJECT target")
       add_library (smce_plugin_${PLUGIN_NAME} OBJECT ${sources})
+      target_include_directories (smce_plugin_${PLUGIN_NAME} SYSTEM PRIVATE "${SMCE_DIR}/RtResources/Ardrivo/include" "${PROJECT_BINARY_DIR}/SMCE_Devices/include")
       set (visibility PUBLIC)
     else ()
       message (DEBUG "[Plugin ${PLUGIN_NAME}] Declaring INTERFACE target")
@@ -300,7 +397,6 @@ function (process_manifests)
       set (visibility INTERFACE)
     endif ()
 
-    target_include_directories (smce_plugin_${PLUGIN_NAME} SYSTEM PRIVATE "${SMCE_DIR}/RtResources/Ardrivo/include" "${PROJECT_BINARY_DIR}/SMCE_Devices/include")
     target_include_directories (smce_plugin_${PLUGIN_NAME} ${visibility} ${incdirs})
     target_link_directories (smce_plugin_${PLUGIN_NAME} ${visibility} ${linkdirs})
     target_link_libraries (smce_plugin_${PLUGIN_NAME} ${visibility} ${linklibs})

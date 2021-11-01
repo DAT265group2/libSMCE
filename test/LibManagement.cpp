@@ -37,6 +37,7 @@
 #if !BOOST_OS_WINDOWS
 #    include <boost/process/search_path.hpp>
 #endif
+#include <vector>
 #include <boost/process/start_dir.hpp>
 #include <boost/process/system.hpp>
 #include <catch2/catch_test_macros.hpp>
@@ -163,6 +164,64 @@ TEST_CASE("Valid manifests processing", "[Plugin]") {
                        "cmake", "--log-level=DEBUG", "-S", ".", "-B", "build", (bp::std_out & bp::std_err) > stderr);
         REQUIRE(res == 0);
     }
+}
+
+TEST_CASE("Valid plugin dependency processing", "[Plugin]") {
+    smce::Toolchain tc{SMCE_PATH};
+    REQUIRE(!tc.check_suitable_environment());
+
+    std::vector<std::string> manifests_name = {"A", "B", "C", "D", "E", "F", "G"};
+    std::vector<std::vector<std::string>> manifests_deps = {{}, {"C", "D"}, {"E", "F"}, {"F", "G"}, {}, {}, {}};
+    std::vector<smce::PluginManifest> plugins;
+
+    for (int i = 0; i < manifests_name.size(); i++) {
+        smce::PluginManifest pm{.name = manifests_name[i],
+                                .version = "0",
+                                .depends = manifests_deps[i],
+                                .uri = "file://" SMCE_PATH,
+                                .defaults = smce::PluginManifest::Defaults::none};
+        plugins.push_back(pm);
+    }
+    smce::SketchConfig skc{"arduino:avr:nano", {}, {}, std::move(plugins), {}};
+
+    smce::Sketch sk{SKETCHES_PATH "noop", std::move(skc)};
+
+    const auto ec = tc.compile(sk);
+    if (ec)
+        std::cerr << tc.build_log().second;
+
+    REQUIRE_FALSE(ec);
+}
+
+TEST_CASE("Invalid plugin dependency processing (cycle check)", "[Plugin]") {
+    smce::Toolchain tc{SMCE_PATH};
+    REQUIRE(!tc.check_suitable_environment());
+
+    std::vector<std::string> manifests_name = {"A", "B", "C"};
+    std::vector<std::vector<std::string>> manifests_deps = {{"B"}, {"C"}, {"A"}};
+    std::vector<smce::PluginManifest> plugins;
+
+    for (int i = 0; i < manifests_name.size(); i++) {
+        smce::PluginManifest pm{.name = manifests_name[i],
+                                .version = "0",
+                                .depends = manifests_deps[i],
+                                .uri = "file://" SMCE_PATH,
+                                .defaults = smce::PluginManifest::Defaults::none};
+        plugins.push_back(pm);
+    }
+    smce::SketchConfig skc{"arduino:avr:nano", {}, {}, std::move(plugins), {}};
+
+    smce::Sketch sk{SKETCHES_PATH "noop", std::move(skc)};
+
+    const auto ec = tc.compile(sk);
+    std::size_t found = 0;
+    if (ec) {
+        std::string s = std::move(tc.build_log().second);
+        std::cerr << s;
+        found = s.find("Plugin dependency cycle detected!");
+    }
+    REQUIRE(ec);
+    REQUIRE(found != std::string::npos);
 }
 
 #if SMCE_ARDRIVO_MQTT
