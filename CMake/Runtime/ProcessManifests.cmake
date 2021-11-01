@@ -22,7 +22,7 @@ endif ()
 function (process_manifests)
   file (GLOB manifests "${CMAKE_SOURCE_DIR}/manifests/*.cmake")
 
-  # LOAD PLUGINS FROM MANIFESTS
+  # Load plugins from the manifests
   set (plugins)
   foreach (manifest ${manifests})
     message (DEBUG "Scanning manifest ${manifest}")
@@ -90,7 +90,7 @@ function (process_manifests)
     unset (PLUGIN_NAME)
   endforeach ()
 
-  # DEPTH FIRST SEARCH
+  # Depth first search
   function (dfs SLIST VLIST VX1)
     set (S_LIST "${${SLIST}}")
     set (V_LIST "${${VLIST}}")
@@ -106,15 +106,15 @@ function (process_manifests)
       if (${I_VX_2} GREATER -1)
         dfs (S_LIST V_LIST VX_2)
       endif ()
-    endforeach()
+    endforeach ()
 
     list (APPEND S_LIST ${VX_1})
     set (${VLIST} ${V_LIST} PARENT_SCOPE)
     set (${SLIST} ${S_LIST} PARENT_SCOPE)
-  endfunction()
+  endfunction ()
 
-  # SCAN PLUGIN DEPENDENCIES AND SORT LIST IN REVERSE DEPENDENCY
-  function(topological_sort PLUGIN_LIST)
+  # Scan plugin dependencies and sort in reverse order
+  function (topological_sort PLUGIN_LIST)
     # Clear the stack and output variable
     set (VERTICES "${${PLUGIN_LIST}}")
     set (STACK)
@@ -122,30 +122,30 @@ function (process_manifests)
     set (${PLUGIN_LIST})
     set (VISIT_LIST)
 
-    #ADD ALL VERTICES TO A TO-VISIT LIST
+    # Add all vertices to a to-visit list
     foreach (VX ${VERTICES})
       list (APPEND VISIT_LIST VISIT_${VX})
-      #IF VERTEX HAS NO DEPEND, PLACE AT BEGINNING OF LIST
+      # If vertex has no depends, place at beginning of list
       if (NOT PLUGIN_${VX}_DEPENDS)
         list (REMOVE_ITEM VERTICES ${VX})
         list (INSERT VERTICES 0 ${VX})
       endif ()
-    endforeach()
+    endforeach ()
 
-    # START DEPTH FIRST SEARCH ON TOPOLOGICAL SORT
+    # Start the dfs in topological sort
     foreach (VX ${VERTICES})
       set (I_VX)
       list (FIND VISIT_LIST VISIT_${VX} I_VX)
       if (${I_VX} GREATER -1)
         dfs (STACK VISIT_LIST VX)
       endif ()
-    endforeach()
+    endforeach ()
 
-    #CYCLE CHECK
+    # Checking for cycles
     set (IND 0)
     list (LENGTH STACK STACK_LENGTH)
 
-    while(STACK_LENGTH GREATER 0)
+    while (STACK_LENGTH GREATER 0)
       # Stores the position of
       # vertex in topological order
       list (GET STACK -1 NEXT_VX)
@@ -155,34 +155,34 @@ function (process_manifests)
       math (EXPR IND "${IND}+1")
       list (APPEND TSORT ${NEXT_VX})
 
-    endwhile()
+    endwhile ()
 
     foreach (VX ${VERTICES})
       foreach (VX_DEP ${PLUGIN_${VX}_DEPENDS})
         if (NOT DEFINED ${VX}_POS)
           set (FIRST 0)
-        else()
+        else ()
           set (FIRST ${${VX}_POS})
         endif ()
         if (NOT DEFINED ${VX_DEP}_POS)
           set (SECOND 0)
-        else()
+        else ()
           set (SECOND ${${VX_DEP}_POS})
         endif ()
         if (FIRST GREATER SECOND)
           message (FATAL_ERROR "Plugin dependency cycle detected!")
-        endif()
-      endforeach()
-    endforeach()
+        endif ()
+      endforeach ()
+    endforeach ()
 
-    # REVERSE LIST OF DEPENDENCIES AND RETURN
+    # Reverse the list of depends and return
     list (REVERSE TSORT)
     set (${PLUGIN_LIST} ${TSORT} PARENT_SCOPE)
   endfunction (topological_sort)
 
   topological_sort (plugins)
 
-  # PROCESS PLUGINS
+  # Process the plugins
   function (process_plugin plugin)
     macro (pass_through suff)
       if (DEFINED PLUGIN_${PLUGIN_NAME}_${suff})
