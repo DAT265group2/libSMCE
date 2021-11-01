@@ -12,7 +12,6 @@ jobs:
         cmake_runtime: [ 3 ]
         cmake_runtime_sub_release: [ 12, 13, 14, 15, 16, 17, 18, 19 ]
         cmake_runtime_sub_version: [ 4 ]
-        boost_version: [ 1.74.0 ]
     env:
       CC: gcc-10
       CXX: g++-10
@@ -54,6 +53,7 @@ jobs:
             -DSMCE_BOOST_LINKING=SOURCE\
             -DSMCE_OPENSSL_LINKING=STATIC \
             -S ./ -B ./build
+          ls build
             
       - name: CMake build
         run: |
