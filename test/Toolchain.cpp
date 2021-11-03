@@ -16,10 +16,10 @@
  *
  */
 #include <filesystem>
+#include <fstream>
 #include <catch2/catch_test_macros.hpp>
 #include "SMCE/Toolchain.hpp"
 #include "defs.hpp"
-#include <fstream>
 
 TEST_CASE("Toolchain invalid", "[Toolchain]") {
     SECTION("empty directory") {
