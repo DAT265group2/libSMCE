@@ -3,25 +3,19 @@ void setup() {
 }
 
 void loop() {
-    if(Serial.available() == 11) {
-        char expected[] = "HELLO";
-        char toWrite[5];
+    char expected[] = "HELLO UART";
+    if(Serial.available() == 11 && Serial.peek() == expected[0]) {
+        char toWrite[11];
 
-        if(Serial.availableForWrite() == 64 && Serial.peek() == expected[0]) {
-            for (int i = 0; i < sizeof(expected); i++) {
-                if (Serial.peek() == expected[i]) {
-                    toWrite[i] = Serial.read();
-                }
+        for (int i = 0; i < sizeof(expected); i++) {
+            if (Serial.peek() == expected[i]) {
+                toWrite[i] = Serial.read();
             }
-            String rest = Serial.readString();
-            for (int i = 0; i < sizeof(toWrite); i++){
-                Serial.print(toWrite[i]);
-            }
-            Serial.print(rest);
         }
-        else
-            Serial.print(Serial.readString());
+        for (int i = 0; i < sizeof(toWrite); i++){
+            Serial.print(toWrite[i]);
+        }
     }
-    else if (Serial.available() > 0)
+    else
         Serial.print(Serial.readString());
 }
