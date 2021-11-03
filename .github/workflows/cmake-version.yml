@@ -32,7 +32,7 @@ jobs:
 
       - name: Install CMake build minimum version
         run: |
-          wget https://cmake.org/files/v${current_build_cmake_version_short}/cmake-${current_build_cmake_version_complete}-Linux-x86_64.sh
+          wget https://github.com/Kitware/CMake/releases/download/v${current_build_cmake_version_complete}/cmake-${current_build_cmake_version_complete}-Linux-x86_64.sh
           sudo chmod +x cmake-${current_build_cmake_version_complete}-Linux-x86_64.sh
           sudo bash ./cmake-${current_build_cmake_version_complete}-Linux-x86_64.sh --skip-license --prefix=/usr/local
           cmake --version
@@ -59,7 +59,7 @@ jobs:
       
       - name: Reintsall CMake runtime minimum version
         run: |
-          wget https://cmake.org/files/v${current_runtime_cmake_version_short}/cmake-${current_runtime_cmake_version_complete}-Linux-x86_64.sh
+          wget https://github.com/Kitware/CMake/releases/download/v${current_runtime_cmake_version_complete}}/cmake-${current_runtime_cmake_version_complete}}-Linux-x86_64.sh
           sudo chmod +x cmake-${current_runtime_cmake_version_complete}-Linux-x86_64.sh
           sudo bash ./cmake-${current_runtime_cmake_version_complete}-Linux-x86_64.sh --skip-license --prefix=/usr/local
           cmake --version
