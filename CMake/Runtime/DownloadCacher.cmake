@@ -27,13 +27,28 @@ function (clear_download_cache)
   # (add option for deleting single cached folder?)
 endfunction ()
 
+#[================================================================================================================[.rst:
+cached_download
+--------------------
+
+Function to define
+
+Usage:
+
+Note:
+
+#]================================================================================================================]
+
 # function for downloading URI with optional force (force re-download)
 # dest: input file name, output absolute real path to download location
 # needs to work 3.12+
 function (cached_download URL DEST FORCE_UPDATE ERROR_PARAM)
   # check if plugin already exists
   # if !exists or FORCE_UPDATE
-    # download and install
+  # download and install
   # update CACHE_LIST
   # return status
 endfunction ()
+
+# file for url mapping in SMCE_DIR/cached_downloads, mutex style
+# lock file in case of race conditions
