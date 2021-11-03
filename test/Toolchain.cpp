@@ -16,10 +16,10 @@
  *
  */
 
+#include <filesystem>
 #include <catch2/catch_test_macros.hpp>
 #include "SMCE/Toolchain.hpp"
 #include "defs.hpp"
-#include <filesystem>
 #include <iostream>
 #include <fstream>
 
