@@ -441,7 +441,10 @@ bool FrameBuffer::read_rgb565(std::span<std::byte> res) {
     return true;
 }
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> 152ce36ba32fe80165aa8e0d75f322e684ab8fba
 FrameBuffer FrameBuffers::operator[](std::size_t key) noexcept {
     if (!m_bdat)
         return {m_bdat, 0};

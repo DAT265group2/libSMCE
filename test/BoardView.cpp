@@ -32,6 +32,10 @@ using namespace std::literals;
 constexpr std::byte operator""_b(char c) noexcept { return static_cast<std::byte>(c); }
 constexpr std::byte operator""_b(unsigned long long c) noexcept { return static_cast<std::byte>(c); }
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> 152ce36ba32fe80165aa8e0d75f322e684ab8fba
 TEST_CASE("BoardView GPIO", "[BoardView]") {
     smce::Toolchain tc{SMCE_PATH};
     REQUIRE(!tc.check_suitable_environment());
@@ -248,7 +252,10 @@ TEST_CASE("BoardView RGB444 cvt", "[BoardView]") {
     REQUIRE(br.stop());
 }
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> 152ce36ba32fe80165aa8e0d75f322e684ab8fba
 /*
  * rgb888ToRgb565
  * 76543210 | 76543210

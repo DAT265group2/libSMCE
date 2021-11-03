@@ -156,6 +156,18 @@ bool Board::start() noexcept {
             return false;
     }
 
+    m_internal->sbdata.configure("SMCE-Runner-" + m_internal->uuid.to_hex(), *m_conf_opt);
+
+    m_status = Status::prepared;
+    return true;
+}
+
+bool Board::start() noexcept {
+    if (m_status == Status::configured)
+        prepare();
+    if (m_status != Status::prepared && m_status != Status::stopped)
+        return false;
+
     do_spawn();
 
     m_status = Status::running;
