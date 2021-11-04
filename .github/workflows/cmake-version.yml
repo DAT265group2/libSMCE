@@ -72,7 +72,7 @@ jobs:
           sudo chmod +x cmake-${{matrix.latestv}}-Linux-x86_64.sh
           sudo bash ./cmake-${{matrix.latestv}}-Linux-x86_64.sh --skip-license --prefix=/usr/local
           cmake --version
-1
+
       - name: CMake configuration
         run: |
           cd /home/runner/work/libSMCE/libSMCE
