@@ -1,24 +1,51 @@
 name: runtime CMake version
 on: [push, pull_request]
 jobs:
+  fetch-cmake-releases:
+    runs-on: ubuntu-latest
+    outputs:
+      lists: ${{steps.generate-list.outputs.lists}}
+    steps:
+      - name: Generate cmake releases list
+        id: generate-list
+        run: |
+          curl \
+            -H "Accept: application/vnd.github.v3+json" \
+            "https://api.github.com/repos/kitware/cmake/tags?per_page=100" | grep "name" > /opt/releases.txt
+            
+          curl \
+            -H "Accept: application/vnd.github.v3+json" \
+            "https://api.github.com/repos/kitware/cmake/tags?per_page=100&page=2" | grep "name" >> /opt/releases.txt
+          
+          python ci/output_list.py > /opt/list.txt
+          
+          echo "::set-output name=lists::$(/opt/list.txt)"
+          
+  fetch-cmake-latest:
+    runs-on: ubuntu-latest
+    outputs: 
+      latest: ${{steps.latest-version.outputs.latest}}
+    steps:
+      - name: cmake latest version
+        id: latest-version
+        run: |
+          wget -qO- -t1 -T2 "https://api.github.com/repos/kitware/cmake/releases/latest" | grep "tag_name" | head -n 1 | awk -F ":" '{print $2}' | sed 's/\"//g;s/v//g;s/,//g;s/ //g'
+          echo "::set-output name=latest::${cat latest.txt}
+          
   minimum-runtime-cmake-version:
     runs-on: ubuntu-latest
+    needs: 
+      - fetch-cmake-releases
+      - fetch-cmake-latest
     strategy:
       fail-fast: false
       matrix:
-        cmake_build: [ 3 ]
-        cmake_build_sub_release: [ 16, 17, 18, 19 ]
-        cmake_build_sub_version: [ 5 ]
-        cmake_runtime: [ 3 ]
-        cmake_runtime_sub_release: [ 12, 13, 14, 15, 16, 17, 18, 19 ]
-        cmake_runtime_sub_version: [ 4 ]
+        list: ${{fromJSON(needs.fetch-cmake-releases.outputs.lists)}}
+        latestv: ${{fromJSON(needs.fetch-cmake-latest.outputs.latest)}}
+      
     env:
       CC: gcc-10
       CXX: g++-10
-      current_build_cmake_version_short: ${{matrix.cmake_build}}.${{matrix.cmake_build_sub_release}}
-      current_build_cmake_version_complete: ${{matrix.cmake_build}}.${{matrix.cmake_build_sub_release}}.${{matrix.cmake_build_sub_version}}
-      current_runtime_cmake_version_short: ${{matrix.cmake_runtime}}.${{matrix.cmake_runtime_sub_release}}
-      current_runtime_cmake_version_complete: ${{matrix.cmake_runtime}}.${{matrix.cmake_runtime_sub_release}}.${{matrix.cmake_runtime_sub_version}}
 
     steps:
       - name: Checkout code
@@ -30,13 +57,22 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y curl wget git ninja-build g++-10 libssl-dev libmosquitto-dev
 
-      - name: Install CMake build minimum version
+      - name: Install CMake build version cmake >=3.16
+        if: ${{matrix.list>=3.16.0}}
         run: |
-          wget https://github.com/Kitware/CMake/releases/download/v${current_build_cmake_version_complete}/cmake-${current_build_cmake_version_complete}-Linux-x86_64.sh
-          sudo chmod +x cmake-${current_build_cmake_version_complete}-Linux-x86_64.sh
-          sudo bash ./cmake-${current_build_cmake_version_complete}-Linux-x86_64.sh --skip-license --prefix=/usr/local
+          wget https://github.com/Kitware/CMake/releases/download/v${{matrix.list}}/cmake-${{matrix.list}}-Linux-x86_64.sh
+          sudo chmod +x cmake-${{matrix.list}}-Linux-x86_64.sh
+          sudo bash ./cmake-${{matrix.list}}-Linux-x86_64.sh --skip-license --prefix=/usr/local
           cmake --version
-
+          
+      - name: Install CMake build version cmake<3.16
+        if: ${{matrix.list<3.16.0}}
+        run: |
+          wget https://github.com/Kitware/CMake/releases/download/v${{matrix.latestv}}/cmake-${{matrix.latestv}}-Linux-x86_64.sh
+          sudo chmod +x cmake-${{matrix.latestv}}-Linux-x86_64.sh
+          sudo bash ./cmake-${{matrix.latestv}}-Linux-x86_64.sh --skip-license --prefix=/usr/local
+          cmake --version
+1
       - name: CMake configuration
         run: |
           cd /home/runner/work/libSMCE/libSMCE
@@ -58,10 +94,11 @@ jobs:
           cmake --build build --target SMCE_Tests
       
       - name: Reintsall CMake runtime minimum version
+        if: ${{matrix.list<3.16.0}}
         run: |
-          wget https://github.com/Kitware/CMake/releases/download/v${current_runtime_cmake_version_complete}/cmake-${current_runtime_cmake_version_complete}-Linux-x86_64.sh
-          sudo chmod +x cmake-${current_runtime_cmake_version_complete}-Linux-x86_64.sh
-          sudo bash ./cmake-${current_runtime_cmake_version_complete}-Linux-x86_64.sh --skip-license --prefix=/usr/local
+          wget https://github.com/Kitware/CMake/releases/download/v${{matrix.list}}/cmake-${{matrix.list}}-Linux-x86_64.sh
+          sudo chmod +x cmake-${{matrix.list}}-Linux-x86_64.sh
+          sudo bash ./cmake-${{matrix.list}}-Linux-x86_64.sh --skip-license --prefix=/usr/local
           cmake --version
 
       - name: Runtime tests
