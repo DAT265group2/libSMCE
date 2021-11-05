@@ -58,7 +58,7 @@ jobs:
           sudo apt-get install -y curl wget git ninja-build g++-10 libssl-dev libmosquitto-dev
 
       - name: Install CMake build version cmake >=3.16
-        if: ${{matrix.list>="3.16.0"}}
+        if: ${{matrix.list>='3.16.0'}}
         run: |
           wget https://github.com/Kitware/CMake/releases/download/v${{matrix.list}}/cmake-${{matrix.list}}-Linux-x86_64.sh
           sudo chmod +x cmake-${{matrix.list}}-Linux-x86_64.sh
@@ -66,7 +66,7 @@ jobs:
           cmake --version
           
       - name: Install CMake build version cmake<3.16
-        if: ${{matrix.list<"3.16.0"}}
+        if: ${{matrix.list<'3.16.0'}}
         run: |
           wget https://github.com/Kitware/CMake/releases/download/v${{matrix.latestv}}/cmake-${{matrix.latestv}}-Linux-x86_64.sh
           sudo chmod +x cmake-${{matrix.latestv}}-Linux-x86_64.sh
@@ -94,7 +94,7 @@ jobs:
           cmake --build build --target SMCE_Tests
       
       - name: Reintsall CMake runtime minimum version
-        if: ${{matrix.list<"3.16.0"}}
+        if: ${{matrix.list<'3.16.0'}}
         run: |
           wget https://github.com/Kitware/CMake/releases/download/v${{matrix.list}}/cmake-${{matrix.list}}-Linux-x86_64.sh
           sudo chmod +x cmake-${{matrix.list}}-Linux-x86_64.sh
