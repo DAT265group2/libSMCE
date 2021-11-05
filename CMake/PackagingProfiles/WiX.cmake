@@ -19,5 +19,6 @@ set (CPACK_GENERATOR WIX)
 #Generate by online website : https://www.guidgenerator.com/online-guid-generator.aspx
 set (CPACK_WIX_UPGRADE_GUID C32F838C-EBF1-42D1-AC8C-DB918F25CD94)
 set (CPACK_WIX_ROOT_FEATURE_TITLE "SMCE libSMCE")
-#set (CPACK_WIX_PRODUCT_ICON "${PROJECT_SOURCE_DIR}/project/media/images/icon.png")
+#set (CPACK_WIX_PATCH_FILE "${PROJECT_SOURCE_DIR}/build/Debug/SMCE.dll")
+set (CPACK_WIX_PATCH_FILE "${PROJECT_SOURCE_DIR}/patch.xml")
 set (CPACK_WIX_PATH)

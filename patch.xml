@@ -1,0 +1,14 @@
+<Environment
+        Id="PATH"
+        Name="PATH"
+        Value="[INSTALLDIR]"
+        Permanent="yes"
+        Part="last"
+        Action="set"
+        System="yes" />
+<CPackWiXPatch>
+<CPackWiXFragment Id="CM_CP_applications.bin.my_libapp.exe">
+    <Environment Id="MyEnvironment" Action="set"
+                 Name="MyVariableName" Value="MyVariableValue"/>
+</CPackWiXFragment>
+</CPackWiXPatch>

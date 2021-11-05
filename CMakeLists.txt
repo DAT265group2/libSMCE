@@ -247,14 +247,16 @@ install (FILES
 
 include (CPackCommon)
 
-if (NOT DEFINED SMCE_CPACK_PROFILE)
-  set (SMCE_CPACK_PROFILE "Archive")
+if (NOT DEFINED LIBSMCE_CPACK_PROFILE)
+  set (LIBSMCE_CPACK_PROFILE "Archive")
 endif ()
 
-include ("${PROJECT_SOURCE_DIR}/CMake/PackagingProfiles/${SMCE_CPACK_PROFILE}.cmake")
+include ("${PROJECT_SOURCE_DIR}/CMake/PackagingProfiles/${LIBSMCE_CPACK_PROFILE}.cmake")
 
 get_cmake_property (CPACK_COMPONENTS_ALL COMPONENTS)
 list (REMOVE_ITEM CPACK_COMPONENTS_ALL "Unspecified")
 include (CPack)
 
 set (CMAKE_MSVC_RUNTIME_LIBRARY "${PREV_CMAKE_MSVC_RUNTIME_LIBRARY}")
+
+
