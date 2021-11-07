@@ -22,7 +22,7 @@ jobs:
             
           pwd 
           
-          ls $pwd/ci/
+          ls $pwd/
           
           python ci/output_list.py > /opt/list.txt
           
