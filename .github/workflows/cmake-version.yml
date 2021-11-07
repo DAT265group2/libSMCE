@@ -6,6 +6,9 @@ jobs:
     outputs:
       lists: ${{steps.generate-list.outputs.lists}}
     steps:
+      - name: Setup python
+        uses: actions/setup-python@v2
+    
       - name: Generate cmake releases list
         id: generate-list
         run: |
