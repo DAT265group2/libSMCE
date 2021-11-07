@@ -19,10 +19,14 @@ jobs:
           curl \
             -H "Accept: application/vnd.github.v3+json" \
             "https://api.github.com/repos/kitware/cmake/tags?per_page=100&page=2" | grep "name" >> /opt/releases.txt
+            
+          pwd 
+          
+          ls $pwd/ci/
           
           python ci/output_list.py > /opt/list.txt
           
-          echo "::set-output name=lists::$(/opt/list.txt)"
+          echo "::set-output name=lists::$(cat /opt/list.txt)"
           
   fetch-cmake-latest:
     runs-on: ubuntu-latest
@@ -32,7 +36,7 @@ jobs:
       - name: cmake latest version
         id: latest-version
         run: |
-          wget -qO- -t1 -T2 "https://api.github.com/repos/kitware/cmake/releases/latest" | grep "tag_name" | head -n 1 | awk -F ":" '{print $2}' | sed 's/\"//g;s/v//g;s/,//g;s/ //g'
+          wget -qO- -t1 -T2 "https://api.github.com/repos/kitware/cmake/releases/latest" | grep "tag_name" | head -n 1 | awk -F ":" '{print $2}' | sed 's/\"//g;s/v//g;s/,//g;s/ //g' > /opt/latest.txt
           echo "::set-output name=latest::${cat latest.txt}
           
   minimum-runtime-cmake-version:
