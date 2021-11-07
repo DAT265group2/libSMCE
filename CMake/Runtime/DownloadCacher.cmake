@@ -19,14 +19,26 @@
 function (cache_init)
   # allocate folder for where to cache the plugins
   # if it exists, clear cache content?
+  file (MAKE_DIRECTORY "${SMCE_DIR}/cached_downloads")
+  file (WRITE "${SMCE_DIR}/cached_downloads/download_mappings.txt" "")
 endfunction ()
 
 # function for cleaning the cache
 function (clear_download_cache)
   # delete all contents in the cached folder
   # (add option for deleting single cached folder?)
+  file (GLOB dls "${SMCE_DIR}/cached_downloads/*")
+  message("Dls-pre: ${dls}")
+  list (REMOVE_ITEM dls "${SMCE_DIR}/cached_downloads/download_mappings.txt")
+  message("Dls-post: ${dls}")
+  file (REMOVE "${dls}")
+  file (WRITE "${SMCE_DIR}/cached_downloads/download_mappings.txt" "")
 endfunction ()
 
+cache_init ()
+message("Cache has been initiated!")
+clear_download_cache ()
+message("Cache has been cleared!")
 #[================================================================================================================[.rst:
 cached_download
 --------------------
@@ -48,6 +60,7 @@ function (cached_download URL DEST FORCE_UPDATE ERROR_PARAM)
   # download and install
   # update CACHE_LIST
   # return status
+
 endfunction ()
 
 # file for url mapping in SMCE_DIR/cached_downloads, mutex style

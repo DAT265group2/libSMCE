@@ -160,7 +160,7 @@ TEST_CASE("Valid manifests processing", "[Plugin]") {
 #if !BOOST_OS_WINDOWS
                        bp::env["CMAKE_GENERATOR"] = generator,
 #endif
-                       "cmake", "--log-level=DEBUG", "-S", ".", "-B", "build", (bp::std_out & bp::std_err) > stderr);
+                       "cmake", "--log-level=DEBUG", "-DSMCE_DIR=" SMCE_PATH, "-S", ".", "-B", "build", (bp::std_out & bp::std_err) > stderr);
         REQUIRE(res == 0);
     }
 }
