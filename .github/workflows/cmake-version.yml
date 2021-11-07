@@ -26,11 +26,12 @@ jobs:
           cat /opt/releases.txt
        
       - name: Compute maximum minor cmake releases
+        id: compute
         run: |
           python ci/output_list.py > /opt/list.txt
-          cat /opt/list.txt
+          LIST = 'cat /opt/list.txt'
                   
-      - run:  echo "::set-output name=lists::$(toJSON(cat /opt/list.txt))"
+      - run:  echo "::set-output name=lists::$(toJSON(steps.compute.LIST)"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           
