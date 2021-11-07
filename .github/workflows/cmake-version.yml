@@ -4,7 +4,7 @@ jobs:
   fetch-cmake-releases:
     runs-on: ubuntu-latest
     outputs:
-      lists: ${{steps.generate-list.outputs.lists}}
+      lists: ${{steps.compute.outputs.lists}}
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -32,10 +32,9 @@ jobs:
           
           releasesversion=$(cat /opt/list.txt)
           echo $releasesversion
-          echo "::set-output name=latest::$(echo "\"version\"" = "\"$releasesversion\"")"
+          echo "::set-output name=lists::$(echo "\"version\"" = "\"$releasesversion\"")"
           echo "\"version\"" : "\"$releasesversion\""
                   
-      - run:  echo "::set-output name=lists::$(cat /opt/list.txt)"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           
