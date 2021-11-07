@@ -23,7 +23,7 @@ jobs:
       - name: TEST
         run: |
           pwd 
-          ls $pwd
+          ls /home/runner/work/libSMCE/libSMCE
 
         
       - name: Compute maximum minor cmake releases
