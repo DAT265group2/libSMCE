@@ -32,8 +32,8 @@ jobs:
           
           releasesversion=$(cat /opt/list.txt)
           echo $releasesversion
-          echo "::set-output name=lists::$(echo "\"version\"" = "\"$releasesversion\"")"
-          echo "\"version\"" : "\"$releasesversion\""
+          echo "::set-output name=lists::$(echo "\"$releasesversion\"")"
+          echo "\"$releasesversion\""
                   
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -53,8 +53,8 @@ jobs:
           cat /opt/latest.txt
           latestversion=$(cat /opt/latest.txt)
           echo $latestversion
-          echo "::set-output name=latest::$(echo "\"version\"" = "\"$latestversion\"")"
-          echo "\"version\"" : "\"$latestversion\""
+          echo "::set-output name=latest::$(echo "\"$latestversion\"")"
+          echo "\"$latestversion\""
           
   minimum-runtime-cmake-version:
     runs-on: ubuntu-latest
