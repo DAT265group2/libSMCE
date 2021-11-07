@@ -37,7 +37,7 @@ jobs:
         id: latest-version
         run: |
           sudo wget -qO- -t1 -T2 https://api.github.com/repos/kitware/cmake/releases/latest | grep "tag_name" | head -n 1 | awk -F ":" '{print $2}' | sed 's/\"//g;s/v//g;s/,//g;s/ //g' > /opt/latest.txt
-          echo "::set-output name=latest::${cat /opt/latest.txt}"
+          echo "::set-output name=latest::$(cat /opt/latest.txt)"
           
   minimum-runtime-cmake-version:
     runs-on: ubuntu-latest
