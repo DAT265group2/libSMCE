@@ -6,6 +6,9 @@ jobs:
     outputs:
       lists: ${{steps.generate-list.outputs.lists}}
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+        
       - name: Setup python
         uses: actions/setup-python@v2
     
