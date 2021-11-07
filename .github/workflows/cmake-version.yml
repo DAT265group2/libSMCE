@@ -22,10 +22,9 @@ jobs:
             
         
       - name: Compute maximum minor cmake releases
-        run: |   
-          python ci/output_list.py > /opt/list.txt
-          
-          echo "::set-output name=lists::$(cat /opt/list.txt)"
+        run: python ci/output_list.py 
+                  
+      - run:  echo "::set-output name=lists::$(cat /opt/list.txt)"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           
