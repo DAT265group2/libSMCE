@@ -30,7 +30,7 @@ jobs:
           python ci/output_list.py > /opt/list.txt
           cat /opt/list.txt
                   
-      - run:  echo "::set-output name=lists::$(cat /opt/list.txt)"
+      - run:  echo "::set-output name=lists::$(toJSON(cat /opt/list.txt))"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           
@@ -46,7 +46,7 @@ jobs:
         id: latest-version
         run: |
           sudo wget -qO- -t1 -T2 https://api.github.com/repos/kitware/cmake/releases/latest | grep "tag_name" | head -n 1 | awk -F ":" '{print $2}' | sed 's/\"//g;s/v//g;s/,//g;s/ //g' > /opt/latest.txt
-          echo "::set-output name=latest::$(cat /opt/latest.txt)"
+          echo "::set-output name=latest::$(toJSON(cat /opt/latest.txt))"
           
   minimum-runtime-cmake-version:
     runs-on: ubuntu-latest
@@ -56,8 +56,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        list: ${{needs.fetch-cmake-releases.outputs.lists}}
-        latestv: ${{3.21.4}}
+        list: ${{ fromJSON(needs.fetch-cmake-releases.outputs.lists) }}
+        latestv: ${{ fromJSON(needs.fetch-cmake-latest.outputs.latest) }}
       
     env:
       CC: gcc-10
