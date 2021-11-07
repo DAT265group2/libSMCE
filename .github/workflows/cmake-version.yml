@@ -17,15 +17,15 @@ jobs:
         run: |
           curl \
             -H "Accept: application/vnd.github.v3+json" \
-            "https://api.github.com/repos/kitware/cmake/tags?per_page=100" | grep "name" > /opt/releases.txt
+            "https://api.github.com/repos/kitware/cmake/tags?per_page=100" | grep "name" | sed $'s/\'//g'> /opt/releases.txt
             
           curl \
             -H "Accept: application/vnd.github.v3+json" \
-            "https://api.github.com/repos/kitware/cmake/tags?per_page=100&page=2" | grep "name" >> /opt/releases.txt
+            "https://api.github.com/repos/kitware/cmake/tags?per_page=100&page=2" | grep "name" | sed $'s/\'//g'>> /opt/releases.txt
        
       - name: Compute maximum minor cmake releases
         run: |
-          python ci/output_list.py | sed 's/"'"//g;s/,//g;s/ //g' > /opt/list.txt
+          python ci/output_list.py > /opt/list.txt
           cat /opt/list.txt
                   
       - run:  echo "::set-output name=lists::$(cat /opt/list.txt)"
