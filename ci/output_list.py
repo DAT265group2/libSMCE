@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 version_list = []
 f = open('/opt/releases.txt')
 line = f.readline()
