@@ -50,7 +50,7 @@ jobs:
           latestversion=$(cat /opt/latest.txt)
           echo $latestversion
           echo "::set-output name=latest::$(echo "\"version\"" = "\"$latestversion\"")"
-          echo "\"version\"" = "\"$latestversion\""
+          echo "\"version\"" : "\"$latestversion\""
           
   minimum-runtime-cmake-version:
     runs-on: ubuntu-latest
