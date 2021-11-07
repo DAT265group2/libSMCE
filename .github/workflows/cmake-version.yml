@@ -25,7 +25,7 @@ jobs:
        
       - name: Compute maximum minor cmake releases
         run: |
-          python ci/output_list.py | sed 's/\'//g' > /opt/list.txt
+          python ci/output_list.py | sed 's/\'//g;s/,//g;s/ //g' > /opt/list.txt
           cat /opt/list.txt
                   
       - run:  echo "::set-output name=lists::$(cat /opt/list.txt)"
