@@ -56,8 +56,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        list: ${{ fromJSON(needs.fetch-cmake-releases.outputs.lists) }}
-        latestv: ${{ fromJSON(needs.fetch-cmake-latest.outputs.latest) }}
+        list: ${{ needs.fetch-cmake-releases.outputs.lists }}
+        latestv: ${{ needs.fetch-cmake-latest.outputs.latest }}
       
     env:
       CC: gcc-10
