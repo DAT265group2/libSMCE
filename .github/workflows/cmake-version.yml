@@ -22,15 +22,11 @@ jobs:
           curl \
             -H "Accept: application/vnd.github.v3+json" \
             "https://api.github.com/repos/kitware/cmake/tags?per_page=100&page=2" | grep "name" >> /opt/releases.txt
-
-      - name: TEST
-        run: |
-          pwd 
-          ls /home/runner/work/libSMCE/libSMCE/
-
-        
+       
       - name: Compute maximum minor cmake releases
-        run: python ci/output_list.py > /opt/list.txt
+        run: |
+          python ci/output_list.py > /opt/list.txt
+          cat /opt/list.txt
                   
       - run:  echo "::set-output name=lists::$(cat /opt/list.txt)"
         env:
@@ -55,8 +51,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        list: ${{fromJSON(needs.fetch-cmake-releases.outputs.lists)}}
-        latestv: ${{fromJSON(needs.fetch-cmake-latest.outputs.latest)}}
+        list: ${{needs.fetch-cmake-releases.outputs.lists}}
+        latestv: ${{needs.fetch-cmake-latest.outputs.latest}}
       
     env:
       CC: gcc-10
