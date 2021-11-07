@@ -1,5 +1,5 @@
 version_list = []
-f = open('opt/releases.txt')
+f = open('/opt/releases.txt')
 line = f.readline()
 while line:
     version = line.split("\"")[3][1:]
