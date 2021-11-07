@@ -1,7 +1,5 @@
-#!/usr/bin/env python
-
 version_list = []
-f = open('/opt/releases.txt')
+f = open('opt/releases.txt')
 line = f.readline()
 while line:
     version = line.split("\"")[3][1:]
@@ -26,4 +24,14 @@ for version in version_list:
         else:
             max_version_list[num] = version
 
-print(max_version_list)
+length = len(max_version_list)
+num = 0
+for e in max_version_list:
+    if num != length-1:
+        with open('/opt/list.txt','a') as f:
+            f.write(e+',')
+    else:
+        with open('/opt/list.txt','a') as f:
+            f.write(e)
+    num += 1
+    
