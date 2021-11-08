@@ -1,3 +1,5 @@
+import json
+
 version_list = []
 f = open('/opt/releases.txt')
 line = f.readline()
@@ -24,14 +26,20 @@ for version in version_list:
         else:
             max_version_list[num] = version
 
-length = len(max_version_list)
-num = 0
+list_json = []
+first_e = True
 for e in max_version_list:
-    if num != length-1:
-        with open('/opt/list.txt','a') as f:
-            f.write(e+',')
-    else:
-        with open('/opt/list.txt','a') as f:
-            f.write(e)
-    num += 1
-    
+    if first_e:
+        list_json.append(dict(cmake_compile_ver=e,cmake_runtime_ver=e))
+        for i in max_version_list:
+            if int(i[2:4]) <= 15:
+                list_json.append(dict(cmake_compile_ver=e,cmake_runtime_ver=i))
+            else:
+                pass
+        first_e = False
+    elif int(e[2:4]) > 15:
+        list_json.append(dict(cmake_compile_ver=e,cmake_runtime_ver=e))
+
+version_json = json.dumps(list_json)
+
+print(version_json)
