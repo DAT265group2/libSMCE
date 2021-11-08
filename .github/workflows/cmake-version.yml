@@ -30,9 +30,6 @@ jobs:
         id: compute
         run: |         
           echo "::set-output name=lists::$(python ci/output_list.py)"       
-       
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
                 
           
   minimum-runtime-cmake-version:
@@ -84,7 +81,6 @@ jobs:
             -DSMCE_BOOST_LINKING=SOURCE\
             -DSMCE_OPENSSL_LINKING=STATIC \
             -S ./ -B ./build
-          ls build/test
             
       - name: CMake build
         run: |
