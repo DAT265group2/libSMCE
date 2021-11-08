@@ -3,8 +3,8 @@ import json
 
 #Fetch the cmake version releases in JSON format
 headers = {"Accept":"application/vnd.github.v3+json"}
-url1 = "https://api.github.com/repos/kitware/cmake/tags?per_page=100&page=1"
-url2 = "https://api.github.com/repos/kitware/cmake/tags?per_page=100&page=2"
+url1 = "https://api.github.com/repos/kitware/cmake/releases?per_page=100&page=1"
+url2 = "https://api.github.com/repos/kitware/cmake/releases?per_page=100&page=2"
 response1 = urllib.request.Request(url1,headers=headers)
 response2 = urllib.request.Request(url2,headers=headers)
 info1 = urllib.request.urlopen(response1)
@@ -15,11 +15,11 @@ info_str2 = json.loads(info2.read().decode("utf-8"))
 #Select the versions of cmake releases which are above 3.11 in the list
 info_version_merge = []
 for i1 in info_str1:
-    if int(i1["name"].split(".")[1]) > 11: 
-        info_version_merge.append(i1["name"][1:])
+    if int(i1["tag_name"].split(".")[1]) > 11: 
+        info_version_merge.append(i1["tag_name"][1:])
 for i2 in info_str2:
-    if int(i2["name"].split(".")[1]) > 11: 
-        info_version_merge.append(i2["name"][1:])
+    if int(i2["tag_name"].split(".")[1]) > 11: 
+        info_version_merge.append(i2["tag_name"][1:])
 info_version_merge.sort(reverse=True)
 
 #Select maximum minor version releases in the list
