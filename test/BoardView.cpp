@@ -262,6 +262,7 @@ TEST_CASE("BoardView RGB565 Read Test", "[BoardView]") {
     std::byte blue_bits[] = {0x0_b, 0_b, 0xFF_b};
     std::byte black_bits[] = {0_b, 0_b, 0_b};
     std::byte white_bits[] = {0xFF_b, 0xFF_b, 0xFF_b};
+    std::byte purple_bits[] = {0xa4_b, 0x52_b, 0xcd_b};
 
     smce::rgb888ToRgb565(red_bits, res);
     // red
@@ -284,6 +285,10 @@ TEST_CASE("BoardView RGB565 Read Test", "[BoardView]") {
     smce::rgb888ToRgb565(white_bits, res);
     REQUIRE(res[1] == 0xFF_b);
     REQUIRE(res[0] == 0xFF_b);
+
+    smce::rgb888ToRgb565(purple_bits, res);
+    REQUIRE(res[1] == 0xA_b);
+    REQUIRE(res[0] == 0x5C_b);
 }
 
 TEST_CASE("BoardView RGB565 Write Test", "[BoardView]") {
@@ -294,6 +299,7 @@ TEST_CASE("BoardView RGB565 Write Test", "[BoardView]") {
     std::byte blue_bits[] = {0x1F_b, 0_b};
     std::byte black_bits[] = {0_b, 0_b};
     std::byte white_bits[] = {0xFF_b, 0xFF_b};
+    std::byte purple_bits[] = {0x99_b, 0xA2_b};
 
     smce::rgb565ToRgb888(std::span{red_bits, 2}, res);
     // red
@@ -322,6 +328,11 @@ TEST_CASE("BoardView RGB565 Write Test", "[BoardView]") {
     REQUIRE(res[0] == 255_b);
     REQUIRE(res[1] == 255_b);
     REQUIRE(res[2] == 255_b);
+
+    smce::rgb565ToRgb888(std::span{purple_bits, 2}, res);
+    REQUIRE(res[0] == 0xA5_b);
+    REQUIRE(res[1] == 0x51_b);
+    REQUIRE(res[2] == 0xCE_b);
 }
 
 

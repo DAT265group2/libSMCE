@@ -378,12 +378,11 @@ bool FrameBuffer::read_rgb444(std::span<std::byte> buf) {
  * 76543210 | 76543210
  * GGGBBBBB   RRRRRGGG
  */
-void rgb565ToRgb888(std::span<const std::byte> buf, std::byte * res) {
+void rgb565ToRgb888(std::span<const std::byte> buf, std::byte* res) {
     // read two bytes
     // read from rgb565 then write to the rgb888
     for (auto i = buf.begin(); i != buf.end(); ++i) {
-        std::byte low = *i;
-        *i++;
+        std::byte low = *i++;
         std::byte high = *i;
 
         // red
@@ -412,7 +411,7 @@ bool FrameBuffer::write_rgb565(std::span<const std::byte> buf) {
 }
 
 void rgb888ToRgb565(const std::byte* buf, std::span<std::byte> res) {
-    // read two bytes(16bits)
+    // read three bytes(24bits)
     for (auto i = res.begin(); i != res.end(); ++i) {
 
         // pick out 24bits in buffer
@@ -435,9 +434,9 @@ bool FrameBuffer::read_rgb565(std::span<std::byte> res) {
         return false;
     [[maybe_unused]] std::lock_guard lk{frame_buf.data_mut};
 
-    const auto* buf = frame_buf.data.data();
-    rgb888ToRgb565(buf, res);
+    auto* buf = frame_buf.data.data();
 
+    rgb888ToRgb565(buf, res);
     return true;
 }
 
