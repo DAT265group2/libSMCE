@@ -5,7 +5,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       lists: ${{steps.compute.outputs.lists}}
-      latest: ${{steps.latest-version.outputs.latest}}
+      
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -36,6 +36,7 @@ jobs:
                 
           
   minimum-runtime-cmake-version:
+    name: compile verion ${{matrix.list.cmake_compile_ver}}; runtime version ${{matrix.list.cmake_runtime_ver}}
     runs-on: ubuntu-latest
     needs: 
       - fetch-cmake-releases
@@ -60,7 +61,7 @@ jobs:
           sudo apt-get install -y curl wget git ninja-build g++-10 libssl-dev libmosquitto-dev
 
       - name: Install CMake build version cmake >=3.16
-        if: needs.fetch-cmake-releases.compute.outputs.lists.cmake_compile_ver == needs.fetch-cmake-releases.compute.outputs.lists.cmake_runtime_ver
+        if: matrix.list.cmake_compile_ver == matrix.list.cmake_runtime_ver
         run: |
           wget https://github.com/Kitware/CMake/releases/download/v${{matrix.list.cmake_runtime_ver}}/cmake-${{matrix.list.cmake_runtime_ver}}-Linux-x86_64.sh
           sudo chmod +x cmake-${{matrix.list.cmake_runtime_ver}}-Linux-x86_64.sh
@@ -68,11 +69,11 @@ jobs:
           cmake --version
           
       - name: Install CMake build version cmake<3.16
-        if: needs.fetch-cmake-releases.compute.outputs.lists.cmake_compile_ver != needs.fetch-cmake-releases.compute.outputs.lists.cmake_runtime_ver
+        if: matrix.list.cmake_compile_ver != matrix.list.cmake_runtime_ver
         run: |
-          wget https://github.com/Kitware/CMake/releases/download/v${{matrix.lists.cmake_compile_ver}}/cmake-${{matrix.lists.cmake_compile_ver}}-Linux-x86_64.sh
-          sudo chmod +x cmake-${{matrix.lists.cmake_compile_ver}}-Linux-x86_64.sh
-          sudo bash ./cmake-${{matrix.lists.cmake_compile_ver}}-Linux-x86_64.sh --skip-license --prefix=/usr/local
+          wget https://github.com/Kitware/CMake/releases/download/v${{matrix.list.cmake_compile_ver}}/cmake-${{matrix.list.cmake_compile_ver}}-Linux-x86_64.sh
+          sudo chmod +x cmake-${{matrix.list.cmake_compile_ver}}-Linux-x86_64.sh
+          sudo bash ./cmake-${{matrix.list.cmake_compile_ver}}-Linux-x86_64.sh --skip-license --prefix=/usr/local
           cmake --version
 
       - name: CMake configuration
