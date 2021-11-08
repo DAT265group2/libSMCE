@@ -36,7 +36,7 @@ jobs:
                 
           
   minimum-runtime-cmake-version:
-    name: compile verion ${{matrix.list.cmake_compile_ver}}; runtime version ${{matrix.list.cmake_runtime_ver}}
+    name: compile ver ${{matrix.list.cmake_compile_ver}}; runtime ver ${{matrix.list.cmake_runtime_ver}}
     runs-on: ubuntu-latest
     needs: 
       - fetch-cmake-releases
@@ -78,7 +78,6 @@ jobs:
 
       - name: CMake configuration
         run: |
-          mkdir build
           cmake \
             -DCMAKE_BUILD_TYPE=Release \
             -DSMCE_CXXRT_LINKING=STATIC \
@@ -96,7 +95,7 @@ jobs:
           cmake --build build --target SMCE_Tests
       
       - name: Reintsall CMake runtime minimum version
-        if: needs.fetch-cmake-releases.compute.outputs.lists.cmake_compile_ver != needs.fetch-cmake-releases.compute.outputs.lists.cmake_runtime_ver
+        if: matrix.list.cmake_compile_ver != matrix.list.cmake_runtime_ver
         run: |
           wget https://github.com/Kitware/CMake/releases/download/v${{matrix.list.cmake_runtime_ver}}/cmake-${{matrix.list.cmake_runtime_ver}}-Linux-x86_64.sh
           sudo chmod +x cmake-${{matrix.list.cmake_runtime_ver}}-Linux-x86_64.sh
