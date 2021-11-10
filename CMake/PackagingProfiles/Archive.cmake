@@ -19,8 +19,8 @@ include_guard ()
 
 
 if (WIN32)
-  #set (CPACK_GENERATOR ZIP 7Z WIX)
-  set (CPACK_GENERATOR WIX)
+  set (CPACK_GENERATOR ZIP 7Z)
+  #set (CPACK_GENERATOR WIX)
 else ()
   set (CPACK_GENERATOR TXZ TGZ STGZ)
 endif ()
