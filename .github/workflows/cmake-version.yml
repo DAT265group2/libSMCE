@@ -17,7 +17,7 @@ jobs:
         id: compute
         run: |         
           echo "::set-output name=lists::$(python ci/output_list.py)"       
-                
+          python ci/output_list.py     
           
   minimum-runtime-cmake-version:
     name: compile ver ${{matrix.list.cmake_compile_ver}}; runtime ver ${{matrix.list.cmake_runtime_ver}}
