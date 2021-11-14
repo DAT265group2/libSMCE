@@ -63,7 +63,7 @@ def vers_json(mv_df):
     list_json = []
     ind = 0
 
-    #If the latest version contain "rc", add the version into the final version list first, then delete the version from the max_version_list
+    #If the latest version contains "rc", add the version into the final version list first, then delete the version from the max_version_list
     if mv_df.iloc[0][3] > 0:  
         list_json.append(dict(cmake_compile_ver=mv_df.iloc[0][4],cmake_runtime_ver=mv_df.iloc[0][4]))
         ind = 1
