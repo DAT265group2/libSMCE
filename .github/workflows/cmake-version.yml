@@ -16,7 +16,7 @@ jobs:
       - name: Generate cmake releases list and compute maximum minor cmake releases
         id: compute
         run: |   
-          sudo apt install python-pip
+          sudo apt install python3-pip
           sudo pip install pandas
           echo "::set-output name=lists::$(python ci/output_list.py)"       
           python ci/output_list.py     
