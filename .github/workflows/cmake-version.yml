@@ -18,8 +18,8 @@ jobs:
         run: |   
           sudo apt install python3-pip
           sudo pip install pandas
-          echo "::set-output name=lists::$(python ci/output_list.py)"       
-          python ci/output_list.py     
+          echo "::set-output name=lists::$(python3 ci/output_list.py)"       
+          python3 ci/output_list.py     
           
   minimum-runtime-cmake-version:
     name: compile ver ${{matrix.list.cmake_compile_ver}}; runtime ver ${{matrix.list.cmake_runtime_ver}}
