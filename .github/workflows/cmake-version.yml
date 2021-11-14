@@ -16,8 +16,8 @@ jobs:
       - name: Generate cmake releases list and compute maximum minor cmake releases
         id: compute
         run: |   
-          sudo python3 -m pip install wheel
-          sudo python3 -m pip install pandas
+          python3 -m pip install wheel
+          python3 -m pip install pandas
           echo "::set-output name=lists::$(python3 ci/output_list.py)"       
           python3 ci/output_list.py     
           
