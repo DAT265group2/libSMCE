@@ -1,12 +1,25 @@
 
 <CPackWiXPatch>
     <CPackWiXFragment>
-        <Environment Id="MyPath" Action="set" Part="first"
-                     Name="PATH" Value="[INSTALL_ROOT]bin"
-                     System="yes"/>
+        <Environment
+                Id="PATH"
+                Name="PATH"
+                Value="[INSTALLDIR]bin/SMCE.dll"
+                Permanent="yes"
+                Part="last"
+                Action="set"
+                System="yes" />
     </CPackWiXFragment>
 </CPackWiXPatch>
-
+<!--
+<CPackWiXPatch>
+<CPackWiXFragment>
+    <Component Id="Path" Guid="*">
+        <Environment Id="PATH" Name="PATH" Value="[INSTALLDIR]" Permanent="no" Part="last" Action="set" System="no" />
+    </Component>
+</CPackWiXFragment>
+</CPackWiXPatch>
+-->
 <!--
 <Environment
 Id="PATH"
