@@ -1,6 +1,4 @@
-<Component Id="cmpEnvironmentVariable"
-           Guid="{C32F838C-EBF1-42D1-AC8C-DB918F25CD94}"
-           KeyPath="yes">
+
     <CPackWiXPatch>
         <CPackWiXFragment Id="cmpEnvironmentVariable">
             <Environment Id="PATH" Action="set" Part="last"
