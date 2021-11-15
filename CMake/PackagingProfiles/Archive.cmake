@@ -27,6 +27,7 @@ if (WIN32)
   set (CPACK_WIX_PATCH_FILE "C:/Users/tanya/SEP-src/libSMCE/patch.xml")
 else ()
   set (CPACK_GENERATOR TXZ TGZ STGZ)
+#  set (CPACK_GENERATOR WIX)
 endif ()
 
 set (CPACK_PACKAGE_FILE_NAME "libSMCE-${PROJECT_NAME}-${PROJECT_VERSION}-${CPACK_SYSTEM_NAME}")
