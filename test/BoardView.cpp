@@ -329,3 +329,4 @@ TEST_CASE("BoardView RGB565 Write Test", "[BoardView]") {
     REQUIRE(res[2] == 0xCE_b);
 }
 
+
