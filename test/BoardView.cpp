@@ -31,8 +31,6 @@ using namespace std::literals;
 
 constexpr std::byte operator""_b(char c) noexcept { return static_cast<std::byte>(c); }
 constexpr std::byte operator""_b(unsigned long long c) noexcept { return static_cast<std::byte>(c); }
-
-
 TEST_CASE("BoardView GPIO", "[BoardView]") {
     smce::Toolchain tc{SMCE_PATH};
     REQUIRE(!tc.check_suitable_environment());

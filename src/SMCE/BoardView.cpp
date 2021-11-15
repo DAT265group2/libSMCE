@@ -390,8 +390,7 @@ void rgb565ToRgb888(std::span<const std::byte> buf, std::byte* res) {
         // red
         *res++ = (high & (std::byte)0xF8) | (high >> 5);
         // green
-        *res++ = ((high & (std::byte)0x07) << 5) | ((low & (std::byte)0xE0) >> 3) |
-                 ((high & (std::byte)0x06) >> 1);
+        *res++ = ((high & (std::byte)0x07) << 5) | ((low & (std::byte)0xE0) >> 3) | ((high & (std::byte)0x06) >> 1);
         // blue
         *res++ = (low << 3) | ((low & (std::byte)0x1F) >> 2);
     }

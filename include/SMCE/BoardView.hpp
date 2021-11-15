@@ -254,7 +254,6 @@ class SMCE_API FrameBuffer {
     bool write_rgb565(std::span<const std::byte>);
     /// Copies a frame into a packed buffer of pixels in the format GGGBBBBBRRRRRGGG
     bool read_rgb565(std::span<std::byte>);
-
 };
 
 SMCE_API void rgb565ToRgb888(std::span<const std::byte>, std::byte*);

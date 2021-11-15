@@ -59,7 +59,6 @@ ctest
 cpack
 ```
 
-
 ### Future development
 - Serve the Doxygen-generated docs
 - Making a proper [Hugo](https://gohugo.io)-generated wiki in Markdown
