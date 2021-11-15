@@ -247,11 +247,7 @@ TEST_CASE("BoardView RGB444 cvt", "[BoardView]") {
     REQUIRE(br.resume());
     REQUIRE(br.stop());
 }
-    /*
-     * rgb888ToRgb565
-     * 76543210 | 76543210
-     * GGGBBBBB   RRRRRGGG
-     */
+
 TEST_CASE("BoardView RGB565 Read Test", "[BoardView]") {
     // convert three bytes(24bits) of rgb888 to two bytes(18bits) of rgb565
     std::byte res[2];
