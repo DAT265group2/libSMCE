@@ -31,6 +31,7 @@ using namespace std::literals;
 
 constexpr std::byte operator""_b(char c) noexcept { return static_cast<std::byte>(c); }
 constexpr std::byte operator""_b(unsigned long long c) noexcept { return static_cast<std::byte>(c); }
+
 TEST_CASE("BoardView GPIO", "[BoardView]") {
     smce::Toolchain tc{SMCE_PATH};
     REQUIRE(!tc.check_suitable_environment());
@@ -243,16 +244,14 @@ TEST_CASE("BoardView RGB444 cvt", "[BoardView]") {
         fb.read_rgb444(out);
         REQUIRE(out == expected_out);
     }
-
     REQUIRE(br.resume());
     REQUIRE(br.stop());
 }
-
-/*
- * rgb888ToRgb565
- * 76543210 | 76543210
- * GGGBBBBB   RRRRRGGG
- */
+    /*
+     * rgb888ToRgb565
+     * 76543210 | 76543210
+     * GGGBBBBB   RRRRRGGG
+     */
 TEST_CASE("BoardView RGB565 Read Test", "[BoardView]") {
     // convert three bytes(24bits) of rgb888 to two bytes(18bits) of rgb565
     std::byte res[2];
@@ -261,7 +260,7 @@ TEST_CASE("BoardView RGB565 Read Test", "[BoardView]") {
     std::byte blue_bits[] = {0x0_b, 0_b, 0xFF_b};
     std::byte black_bits[] = {0_b, 0_b, 0_b};
     std::byte white_bits[] = {0xFF_b, 0xFF_b, 0xFF_b};
-    std::byte purple_bits[] = {0xa4_b, 0x52_b, 0xcd_b};
+    std::byte purple_bits[] = {0xA4_b, 0x52_b, 0xCD_b};
 
     smce::rgb888ToRgb565(red_bits, res);
     // red
@@ -286,8 +285,8 @@ TEST_CASE("BoardView RGB565 Read Test", "[BoardView]") {
     REQUIRE(res[0] == 0xFF_b);
 
     smce::rgb888ToRgb565(purple_bits, res);
-    REQUIRE(res[1] == 0xA_b);
-    REQUIRE(res[0] == 0x5C_b);
+    REQUIRE(res[1] == 0xA2_b);
+    REQUIRE(res[0] == 0x99_b);
 }
 
 TEST_CASE("BoardView RGB565 Write Test", "[BoardView]") {
@@ -305,7 +304,7 @@ TEST_CASE("BoardView RGB565 Write Test", "[BoardView]") {
     REQUIRE(res[0] == 255_b);
     // green
     REQUIRE(res[1] == 0_b);
-    // blue
+    // blues
     REQUIRE(res[2] == 0_b);
 
     smce::rgb565ToRgb888(std::span{green_bits, 2}, res);
@@ -333,5 +332,4 @@ TEST_CASE("BoardView RGB565 Write Test", "[BoardView]") {
     REQUIRE(res[1] == 0x51_b);
     REQUIRE(res[2] == 0xCE_b);
 }
-
 
