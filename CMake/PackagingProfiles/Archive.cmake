@@ -19,18 +19,17 @@ include_guard ()
 
 
 if (WIN32)
-  #set (CPACK_GENERATOR ZIP 7Z)
   set (CPACK_GENERATOR WIX)
-  #Generate by online website : https://www.guidgenerator.com/online-guid-generator.aspx
-  set (CPACK_WIX_UPGRADE_GUID C32F838C-EBF1-42D1-AC8C-DB918F25CD94)
-  set (CPACK_WIX_ROOT_FEATURE_TITLE "SMCE libSMCE")
-  set (CPACK_WIX_PATCH_FILE "C:/Users/tanya/SEP-src/libSMCE/patch.xml")
+  #set (CPACK_GENERATOR ZIP 7Z)
+  include ("${PROJECT_SOURCE_DIR}/CMake/PackagingProfiles/WiX.cmake")
+
 else ()
   set (CPACK_GENERATOR TXZ TGZ STGZ)
 #  set (CPACK_GENERATOR WIX)
 endif ()
 
-set (CPACK_PACKAGE_FILE_NAME "libSMCE-${PROJECT_NAME}-${PROJECT_VERSION}-${CPACK_SYSTEM_NAME}")
+#this is the name of the package
+set (CPACK_PACKAGE_FILE_NAME "${PROJECT_NAME}-${PROJECT_VERSION}-${CPACK_SYSTEM_NAME}")
 
 if (MSVC)
   string (APPEND CPACK_PACKAGE_FILE_NAME "-${CMAKE_BUILD_TYPE}")

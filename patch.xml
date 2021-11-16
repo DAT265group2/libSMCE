@@ -1,53 +1,5 @@
-<Component Id="cmpEnvironmentVariable"
-           Guid="{C32F838C-EBF1-42D1-AC8C-DB918F25CD94}"
-           KeyPath="yes">
-    <CPackWiXPatch>
-        <CPackWiXFragment Id="cmpEnvironmentVariable">
-            <Environment Id="PATH" Action="set" Part="last"
-                         Name="PATH" Value="SOME"  Separator=";"
-                         System="yes"/>
-        </CPackWiXFragment>
-    </CPackWiXPatch>
-
-<!--
 <CPackWiXPatch>
-    <CPackWiXFragment>
-        <Environment
-                Id="PATH"
-                Name="PATH"
-                Value="[INSTALLDIR]bin/SMCE.dll"
-                Permanent="yes"
-                Part="last"
-                Action="set"
-                System="yes" />
+    <CPackWiXFragment Id="CM_CP_bin.SMCE.dll">
+        <Environment Id='UpdatePath' Name='PATH' Action='set' Permanent='no' System='yes' Part='last' Value='[INSTALL_ROOT]bin\SMCE.dll' />
     </CPackWiXFragment>
 </CPackWiXPatch>
--->
-<!--
-<CPackWiXPatch>
-<CPackWiXFragment>
-    <Component Id="Path" Guid="*">
-        <Environment Id="PATH" Name="PATH" Value="[INSTALLDIR]" Permanent="no" Part="last" Action="set" System="no" />
-    </Component>
-</CPackWiXFragment>
-</CPackWiXPatch>
--->
-
-<!--
-<Environment
-Id="PATH"
-Name="PATH"
-Value="[INSTALLDIR]/build/Debug/SMCE.dll"
-Permanent="yes"
-Part="last"
-Action="set"
-System="yes" />
--->
-<!--
-<CPackWiXPatch>
-<CPackWiXFragment Id="CM_CP_applications.bin.my_libapp.exe">
-    <Environment Id="MyEnvironment" Action="set"
-                 Name="MyVariableName" Value="MyVariableValue"/>
-</CPackWiXFragment>
-</CPackWiXPatch>
--->
