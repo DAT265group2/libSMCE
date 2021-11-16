@@ -19,15 +19,14 @@ include_guard ()
 
 
 if (WIN32)
-  set (CPACK_GENERATOR WIX)
-  #set (CPACK_GENERATOR ZIP 7Z WIX)
+  #set (CPACK_GENERATOR WIX)
+  set (CPACK_GENERATOR ZIP 7Z WIX)
   include ("${PROJECT_SOURCE_DIR}/CMake/PackagingProfiles/WiX.cmake")
 else ()
   set (CPACK_GENERATOR TXZ TGZ STGZ)
-#  set (CPACK_GENERATOR WIX)
 endif ()
 
-#this is the name of the package
+#this is the name of the packages
 set (CPACK_PACKAGE_FILE_NAME "${PROJECT_NAME}-${PROJECT_VERSION}-${CPACK_SYSTEM_NAME}")
 
 if (MSVC)
