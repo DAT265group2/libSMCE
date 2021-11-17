@@ -20,6 +20,7 @@ include_guard ()
 
 if (WIN32)
   set (CPACK_GENERATOR ZIP 7Z WIX)
+
 else ()
   set (CPACK_GENERATOR TXZ TGZ STGZ)
 endif ()

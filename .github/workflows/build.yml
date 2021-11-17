@@ -331,6 +331,7 @@ jobs:
           cmake -G Ninja `
             -DBOOST_ROOT=C:\local\boost_${{ matrix.boost.slug }} `
             -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} `
+            -DSMCE_CPACK_PROFILE=WiX `
             -DSMCE_CXXRT_LINKING=SHARED `
             -DSMCE_BOOST_LINKING=STATIC `
             -DSMCE_OPENSSL_LINKING=STATIC `
