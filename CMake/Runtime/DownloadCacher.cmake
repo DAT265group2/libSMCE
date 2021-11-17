@@ -15,30 +15,13 @@
 #  limitations under the License.
 #
 
-# initialize the cache, call it from within cached_download
-function (cache_init)
-  # allocate folder for where to cache the plugins
-  # if it exists, clear cache content?
-  file (MAKE_DIRECTORY "${SMCE_DIR}/cached_downloads")
-  file (WRITE "${SMCE_DIR}/cached_downloads/download_mappings.txt" "")
-endfunction ()
-
 # function for cleaning the cache
 function (clear_download_cache)
   # delete all contents in the cached folder
-  # (add option for deleting single cached folder?)
-  file (GLOB dls "${SMCE_DIR}/cached_downloads/*")
-  message("Dls-pre: ${dls}")
-  list (REMOVE_ITEM dls "${SMCE_DIR}/cached_downloads/download_mappings.txt")
-  message("Dls-post: ${dls}")
-  file (REMOVE "${dls}")
-  file (WRITE "${SMCE_DIR}/cached_downloads/download_mappings.txt" "")
-endfunction ()
+  file (REMOVE_RECURSE "${SMCE_DIR}/cached_downloads/")
+  message ("Cache has been cleared!")
+endfunction (clear_download_cache)
 
-cache_init ()
-message("Cache has been initiated!")
-clear_download_cache ()
-message("Cache has been cleared!")
 #[================================================================================================================[.rst:
 cached_download
 --------------------
@@ -54,14 +37,70 @@ Note:
 # function for downloading URI with optional force (force re-download)
 # dest: input file name, output absolute real path to download location
 # needs to work 3.12+
-function (cached_download URL DEST FORCE_UPDATE ERROR_PARAM)
-  # check if plugin already exists
-  # if !exists or FORCE_UPDATE
-  # download and install
-  # update CACHE_LIST
-  # return status
+function (cached_download)
+  # initialize the cache download directory
+  file (MAKE_DIRECTORY "${SMCE_DIR}/cached_downloads")
 
-endfunction ()
+  # parse args
+  set (options FORCE_UPDATE)
+  set (oneValueArgs URL RESULT_VARIABLE DEST)
+  set (multiValueArgs)
+  cmake_parse_arguments ("ARG" "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
-# file for url mapping in SMCE_DIR/cached_downloads, mutex style
-# lock file in case of race conditions
+  if (ARG_UNPARSED_ARGUMENTS)
+    set (ARG_RESULT_VARIABLE "Function was called with too many arguments" PARENT_SCOPE)
+    message (FATAL_ERROR "Function was called with too many arguments")
+  endif ()
+  
+  # use SHA256 hash to URL to create unique identifier, lock download location mutex-style
+  set ("${ARG_RESULT_VARIABLE}" "" PARENT_SCOPE)
+  string (SHA256 HASHED_DEST "${ARG_URL}")
+  set (DOWNLOAD_PATH "${SMCE_DIR}/cached_downloads/${HASHED_DEST}")
+  file (TOUCH "${DOWNLOAD_PATH}.lock")
+  file (LOCK "${DOWNLOAD_PATH}.lock")
+
+  # check if plugin has already been downloaded and cached before  
+  if (EXISTS "${DOWNLOAD_PATH}")
+    set (INDEX 1)
+  else ()
+    set (INDEX -1)
+  endif ()
+  
+  # if download has been cached previously and is requested a forced re-download, clean previous download and re-cache 
+  if (${INDEX} GREATER -1 AND ${ARG_FORCE_UPDATE})
+    file (REMOVE "${DOWNLOAD_PATH}")
+    set (${INDEX} -1)
+  endif ()
+
+  # if download has not been cached, download. Otherwise pass.
+  if (${INDEX} LESS 0)
+    message (DEBUG "Downloading")
+
+    file (DOWNLOAD "${ARG_URL}" "${DOWNLOAD_PATH}" STATUS DLSTATUS)
+    list (GET DLSTATUS 0 DLSTATUS_CODE)
+    if (DLSTATUS_CODE)
+      list (GET DLSTATUS 1 DLSTATUS_MESSAGE)
+      file (REMOVE "${DOWNLOAD_PATH}")
+      file (REMOVE "${DOWNLOAD_PATH}.lock")
+      set (ARG_RESULT_VARIABLE "${DLSTATUS}" PARENT_SCOPE)
+      message (FATAL_ERROR "Download failed: (${DLSTATUS_CODE}) ${DLSTATUS_MESSAGE}")
+    endif ()
+    message (DEBUG "Download complete")
+    message (DEBUG "Cached!")
+  else ()
+    message (DEBUG "Has already been cached!")
+  endif ()
+
+  # Unlock file and output absolute real path to download location
+  file (LOCK "${DOWNLOAD_PATH}.lock" RELEASE)
+  file (REMOVE "${DOWNLOAD_PATH}.lock")
+  
+  if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.19")
+    file (REAL_PATH "${DOWNLOAD_PATH}" DOWNLOAD_PATH)
+  else ()
+    get_filename_component (DOWNLOAD_PATH "${DOWNLOAD_PATH}" REALPATH)
+  endif ()
+  
+  set ("${ARG_DEST}" "${DOWNLOAD_PATH}" PARENT_SCOPE)
+
+endfunction (cached_download)
