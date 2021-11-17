@@ -127,6 +127,7 @@ class SMCE_API VirtualUartBuffer {
     BoardData* m_bdat;
     std::size_t m_index;
     Direction m_dir;
+    bool blocked_rw;
     constexpr VirtualUartBuffer(BoardData* bdat, std::size_t idx, Direction dir)
         : m_bdat{bdat}, m_index{idx}, m_dir{dir} {}
 
@@ -140,6 +141,7 @@ class SMCE_API VirtualUartBuffer {
     std::size_t read(std::span<char>) noexcept;
     std::size_t write(std::span<const char>) noexcept;
     [[nodiscard]] char front() noexcept;
+    void blocking_rw() noexcept;
 };
 
 constexpr bool operator==(const VirtualUartBuffer& lhs, const VirtualUartBuffer& rhs) noexcept {

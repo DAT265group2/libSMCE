@@ -148,6 +148,8 @@ VirtualPin VirtualPins::operator[](std::size_t pin_id) noexcept {
 std::size_t VirtualUartBuffer::read(std::span<char> buf) noexcept {
     if (!exists())
         return 0;
+    if (blocked_rw)  //If read and write functions are blocked, return 0.
+        return 0;
     auto& chan = m_bdat->uart_channels[m_index];
     auto [d, mut, max_buffered] = [&] {
         switch (m_dir) {
@@ -169,6 +171,8 @@ std::size_t VirtualUartBuffer::read(std::span<char> buf) noexcept {
 
 std::size_t VirtualUartBuffer::write(std::span<const char> buf) noexcept {
     if (!exists())
+        return 0;
+    if (blocked_rw)  //If read and write functions are blocked, return 0.
         return 0;
     auto& chan = m_bdat->uart_channels[m_index];
     auto [d, mut, max_buffered] = [&] {
@@ -220,6 +224,10 @@ std::size_t VirtualUartBuffer::write(std::span<const char> buf) noexcept {
 void VirtualUart::set_active(bool value) noexcept {
     if (exists())
         m_bdat->uart_channels[m_index].active.store(value);
+}
+
+void VirtualUartBuffer::blocking_rw() noexcept {
+    blocked_rw = false;
 }
 
 [[nodiscard]] VirtualUart VirtualUarts::operator[](std::size_t idx) noexcept {
