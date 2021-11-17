@@ -26,17 +26,24 @@ endfunction (clear_download_cache)
 cached_download
 --------------------
 
-Function to define
+Function to allow for caching of various downloads.
 
 Usage:
+.. code-block:: cmake
+
+  cached_download(<URL> <DEST> <RESULT_VARIABLE> <FORCE_UPDATE> )
+
+Where ``<URL>`` is the URL to the file to be downloaded, ``<DEST>`` is the name of the variable to store the absolute
+real path to the download location passed to the parent scope by the function, ``<RESULT_VARIABLE>``
+is the name of the variable to store the result of all processes passed to the parent scope by
+the function, ``<FORCE_UPDATE>`` will define whether an already cached download should be re-downloaded and cached.
+
 
 Note:
-
+No additional arguments except for the ones defined are allowed in the function call.
+Uses SHA256 to create a uniquely hashed download location for each download.
+File is locked until each download process is completed.
 #]================================================================================================================]
-
-# function for downloading URI with optional force (force re-download)
-# dest: input file name, output absolute real path to download location
-# needs to work 3.12+
 function (cached_download)
   # initialize the cache download directory
   file (MAKE_DIRECTORY "${SMCE_DIR}/cached_downloads")
