@@ -60,7 +60,7 @@ jobs:
             -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
             -DCMAKE_BUILD_TYPE=Debug \
             -DSMCE_CXXRT_LINKING=STATIC \
-            -DSMCE_BOOST_LINKING=STATIC \
+            -DSMCE_BOOST_LINKING=AUTO \
             -DSMCE_OPENSSL_LINKING=STATIC -S ./ -B ./build
       - name: Run sonar-scanner
         env:
