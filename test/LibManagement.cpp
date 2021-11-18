@@ -174,8 +174,8 @@ TEST_CASE("Valid download caching", "[Plugin]") {
     const auto cached_downloads_path = SMCE_PATH "/cached_downloads/";
 
     if (std::filesystem::exists(cached_downloads_path)) {
-        [[maybe_unused]] std::error_code ec_1;
-        std::filesystem::remove_all(cached_downloads_path, ec_1);
+        [[maybe_unused]] std::error_code ec;
+        std::filesystem::remove_all(cached_downloads_path, ec);
     }
 
     std::array<std::string_view, 3> uris = {"https://github.com/ERROPiX/ESP32_AnalogWrite/archive/refs/tags/0.2.zip",

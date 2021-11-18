@@ -33,10 +33,10 @@ Usage:
 
   cached_download (URL <url> DEST <dest-var> [RESULT_VARIABLE <res-var>] [FORCE_UPDATE])
 
-Where ``<URL>`` is the URL to the file to be downloaded, ``<DEST>`` is the name of the variable to store the absolute
-real path to the download location passed to the parent scope by the function, ``<RESULT_VARIABLE>``
+Where ``<url>`` is the URL to the file to be downloaded, ``<dest-var>`` is the name of the variable to store the absolute
+real path to the download location passed to the parent scope by the function, ``<res-var>``
 is the name of the variable to store the result of all processes passed to the parent scope by
-the function, ``<FORCE_UPDATE>`` will define whether an already cached download should be re-downloaded and cached.
+the function, ``[FORCE_UPDATE]`` will define whether an already cached download should be re-downloaded and cached.
 
 
 Note:
@@ -55,7 +55,7 @@ function (cached_download)
   set (multiValueArgs)
   cmake_parse_arguments ("ARG" "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
-  if (ARG_UNPARSED_ARGUMENTS)
+  if (${ARG_UNPARSED_ARGUMENTS})
     set (ARG_RESULT_VARIABLE "Function was called with too many arguments" PARENT_SCOPE)
     message (FATAL_ERROR "Function was called with too many arguments")
   endif ()
