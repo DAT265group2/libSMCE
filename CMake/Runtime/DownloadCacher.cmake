@@ -19,7 +19,7 @@
 function (clear_download_cache)
   # delete all contents in the cached folder
   file (REMOVE_RECURSE "${SMCE_DIR}/cached_downloads/")
-  message ("Cache has been cleared!")
+  message (STATUS "Cache cleared")
 endfunction (clear_download_cache)
 
 #[================================================================================================================[.rst:
@@ -31,7 +31,7 @@ Function to allow for caching of various downloads.
 Usage:
 .. code-block:: cmake
 
-  cached_download(<URL> <DEST> <RESULT_VARIABLE> <FORCE_UPDATE> )
+  cached_download (URL <url> DEST <dest-var> [RESULT_VARIABLE <res-var>] [FORCE_UPDATE])
 
 Where ``<URL>`` is the URL to the file to be downloaded, ``<DEST>`` is the name of the variable to store the absolute
 real path to the download location passed to the parent scope by the function, ``<RESULT_VARIABLE>``
