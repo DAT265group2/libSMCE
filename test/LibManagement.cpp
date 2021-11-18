@@ -188,8 +188,8 @@ TEST_CASE("Valid download caching", "[Plugin]") {
     for (int i = 0; i < uris.size(); i++) {
         std::vector<smce::PluginManifest> plugins{
             smce::PluginManifest{.name = "ESP32_AnalogWrite",
-                                 .version = std::string(versions[i]),
-                                 .uri = std::string(uris[i]),
+                                 .version = std::string{versions[i]},
+                                 .uri = std::string{uris[i]},
                                  .defaults = smce::PluginManifest::Defaults::none}};
 
         smce::SketchConfig skc{.fqbn = "arduino:avr:nano", .plugins = std::move(plugins)};
