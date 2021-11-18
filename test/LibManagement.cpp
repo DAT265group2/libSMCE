@@ -179,8 +179,8 @@ TEST_CASE("Valid download caching", "[Plugin]") {
     }
 
     std::array<std::string_view, 3> uris = {"https://github.com/ERROPiX/ESP32_AnalogWrite/archive/refs/tags/0.2.zip",
-                                     "https://github.com/ERROPiX/ESP32_AnalogWrite/archive/refs/tags/0.1.zip",
-                                     "https://github.com/ERROPiX/ESP32_AnalogWrite/archive/refs/tags/0.2.zip"};
+                                            "https://github.com/ERROPiX/ESP32_AnalogWrite/archive/refs/tags/0.1.zip",
+                                            "https://github.com/ERROPiX/ESP32_AnalogWrite/archive/refs/tags/0.2.zip"};
 
     std::array<std::string_view, 3> versions = {"0.2", "0.1", "0.2"};
     std::vector<smce::PluginManifest> plugins;
