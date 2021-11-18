@@ -30,6 +30,7 @@
 
 #include <boost/predef.h>
 
+#include <boost/atomic.hpp>
 #include <boost/atomic/ipc_atomic.hpp>
 #include <boost/atomic/ipc_atomic_flag.hpp>
 #include <boost/interprocess/allocators/allocator.hpp>
@@ -122,6 +123,8 @@ struct SMCE_INTERNAL BoardData {
     };
     struct SMCE_INTERNAL UartChannel {
         IpcAtomicValue<bool> active = false; // rw
+        boost::atomic<std::size_t> original_size;
+        boost::atomic<std::size_t> empty_size = 0;
         IpcMovableMutex rx_mut;
         IpcMovableMutex tx_mut;
         boost::interprocess::deque<char, ShmAllocator<char>> rx; // rw
