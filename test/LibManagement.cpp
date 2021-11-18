@@ -171,23 +171,25 @@ TEST_CASE("Valid download caching", "[Plugin]") {
     smce::Toolchain tc{SMCE_PATH};
     REQUIRE(!tc.check_suitable_environment());
 
-    if (std::filesystem::exists(CACHED_DOWNLOADS_PATH)) {
+    const auto cached_downloads_path = SMCE_PATH "/cached_downloads/";
+
+    if (std::filesystem::exists(cached_downloads_path)) {
         [[maybe_unused]] std::error_code ec_1;
-        std::filesystem::remove_all(CACHED_DOWNLOADS_PATH, ec_1);
+        std::filesystem::remove_all(cached_downloads_path, ec_1);
     }
 
-    std::vector<std::string> uris = {"https://github.com/ERROPiX/ESP32_AnalogWrite/archive/refs/tags/0.2.zip",
+    std::array<std::string_view, 3> uris = {"https://github.com/ERROPiX/ESP32_AnalogWrite/archive/refs/tags/0.2.zip",
                                      "https://github.com/ERROPiX/ESP32_AnalogWrite/archive/refs/tags/0.1.zip",
                                      "https://github.com/ERROPiX/ESP32_AnalogWrite/archive/refs/tags/0.2.zip"};
 
-    std::vector<std::string> versions = {"0.2", "0.1", "0.2"};
+    std::array<std::string_view, 3> versions = {"0.2", "0.1", "0.2"};
     std::vector<smce::PluginManifest> plugins;
 
     for (int i = 0; i < uris.size(); i++) {
         std::vector<smce::PluginManifest> plugins{
             smce::PluginManifest{.name = "ESP32_AnalogWrite",
-                                 .version = versions[i],
-                                 .uri = uris[i],
+                                 .version = std::string(versions[i]),
+                                 .uri = std::string(uris[i]),
                                  .defaults = smce::PluginManifest::Defaults::none}};
 
         smce::SketchConfig skc{.fqbn = "arduino:avr:nano", .plugins = std::move(plugins)};
@@ -201,8 +203,9 @@ TEST_CASE("Valid download caching", "[Plugin]") {
         REQUIRE_FALSE(ec);
     }
 
-    [[maybe_unused]] std::error_code ec_2;
-    std::size_t count = std::filesystem::remove_all(CACHED_DOWNLOADS_PATH, ec_2) - 1;
+    [[maybe_unused]] std::error_code ec;
+    std::size_t count = std::filesystem::remove_all(cached_downloads_path, ec) - 1;
+    REQUIRE_FALSE(ec);
 
     REQUIRE(count == 2);
 }

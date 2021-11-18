@@ -42,7 +42,8 @@ the function, ``<FORCE_UPDATE>`` will define whether an already cached download 
 Note:
 No additional arguments except for the ones defined are allowed in the function call.
 Uses SHA256 to create a uniquely hashed download location for each download.
-File is locked until each download process is completed.
+Download file is locked until the file has been downloaded and cached, this is done in order to avoid
+possible race conditions.
 #]================================================================================================================]
 function (cached_download)
   # initialize the cache download directory
