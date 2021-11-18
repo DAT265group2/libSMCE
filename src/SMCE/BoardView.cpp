@@ -148,6 +148,7 @@ VirtualPin VirtualPins::operator[](std::size_t pin_id) noexcept {
 std::size_t VirtualUartBuffer::read(std::span<char> buf) noexcept {
     if (!exists())
         return 0;
+    original_size = size();
     original_size.wait(buf.size());
     auto& chan = m_bdat->uart_channels[m_index];
     auto [d, mut, max_buffered] = [&] {

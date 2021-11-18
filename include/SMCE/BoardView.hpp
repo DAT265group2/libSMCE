@@ -143,7 +143,7 @@ class SMCE_API VirtualUartBuffer {
     std::size_t read(std::span<char>) noexcept;
     std::size_t write(std::span<const char>) noexcept;
     [[nodiscard]] char front() noexcept;
-    std::atomic<std::size_t> original_size = size();
+    std::atomic<std::size_t> original_size;
     std::atomic<std::size_t> empty_size = 0;
 };
 
