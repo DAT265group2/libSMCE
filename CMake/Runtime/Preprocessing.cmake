@@ -106,9 +106,9 @@ file (APPEND "${PROJECT_BINARY_DIR}/ArduinoSourceBuild.cmake" [[
 ]])
 
 add_custom_command (OUTPUT "${PROJECT_SOURCE_DIR}/sketch.cpp"
-        COMMAND "${CMAKE_COMMAND}" -E env ARDUINO_PRELUDE_DUMP_COMPOSITE=1 "${CMAKE_COMMAND}" -P "${PROJECT_BINARY_DIR}/ArduinoSourceBuild.cmake"
-        DEPENDS ${SKETCH_SOURCE_FILES}
-        COMMENT "Preprocessing sketch \"${SKETCH_DIR}\""
-        )
+    COMMAND "${CMAKE_COMMAND}" -E env ARDUINO_PRELUDE_DUMP_COMPOSITE=1 "${CMAKE_COMMAND}" -P "${PROJECT_BINARY_DIR}/ArduinoSourceBuild.cmake"
+    DEPENDS ${SKETCH_SOURCE_FILES}
+    COMMENT "Preprocessing sketch \"${SKETCH_DIR}\""
+)
 
 target_sources (Sketch PRIVATE "${PROJECT_SOURCE_DIR}/sketch.cpp")
