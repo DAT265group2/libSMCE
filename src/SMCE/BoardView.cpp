@@ -148,8 +148,7 @@ VirtualPin VirtualPins::operator[](std::size_t pin_id) noexcept {
 std::size_t VirtualUartBuffer::read(std::span<char> buf) noexcept {
     if (!exists())
         return 0;
-    sem_read().acquire();
-    number_read = number_read - 1;
+    original_size.wait(buf.size());
     auto& chan = m_bdat->uart_channels[m_index];
     auto [d, mut, max_buffered] = [&] {
         switch (m_dir) {
@@ -166,17 +165,13 @@ std::size_t VirtualUartBuffer::read(std::span<char> buf) noexcept {
     const std::size_t count = std::min(d.size(), buf.size());
     std::copy_n(d.begin(), count, buf.begin());
     d.erase(d.begin(), d.begin() + count);
-    if (count > d.size())
-        sem_read().release();
-    number_read = number_read + 1;
     return count;
 }
 
 std::size_t VirtualUartBuffer::write(std::span<const char> buf) noexcept {
     if (!exists())
         return 0;
-    sem_write().acquire();
-    number_write = number_write - 1;
+    empty_size.wait(buf.size());
     auto& chan = m_bdat->uart_channels[m_index];
     auto [d, mut, max_buffered] = [&] {
         switch (m_dir) {
@@ -194,9 +189,6 @@ std::size_t VirtualUartBuffer::write(std::span<const char> buf) noexcept {
     const std::size_t count = std::min(
         std::clamp(max_buffered - d.size(), std::size_t{0}, static_cast<std::size_t>(max_buffered)), buf.size());
     std::copy_n(buf.begin(), count, std::back_inserter(d));
-    if (count > 0)
-        sem_write().release();
-    number_write = number_write + 1;
     return count;
 
 }
