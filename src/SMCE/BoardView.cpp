@@ -148,8 +148,8 @@ VirtualPin VirtualPins::operator[](std::size_t pin_id) noexcept {
 std::size_t VirtualUartBuffer::read(std::span<char> buf) noexcept {
     if (!exists())
         return 0;
-    if (blocked_rw)  //If read and write functions are blocked, return 0.
-        return 0;
+    sem_read().acquire();
+    number_read = number_read - 1;
     auto& chan = m_bdat->uart_channels[m_index];
     auto [d, mut, max_buffered] = [&] {
         switch (m_dir) {
@@ -166,14 +166,17 @@ std::size_t VirtualUartBuffer::read(std::span<char> buf) noexcept {
     const std::size_t count = std::min(d.size(), buf.size());
     std::copy_n(d.begin(), count, buf.begin());
     d.erase(d.begin(), d.begin() + count);
+    if (count > d.size())
+        sem_read().release();
+    number_read = number_read + 1;
     return count;
 }
 
 std::size_t VirtualUartBuffer::write(std::span<const char> buf) noexcept {
     if (!exists())
         return 0;
-    if (blocked_rw)  //If read and write functions are blocked, return 0.
-        return 0;
+    sem_write().acquire();
+    number_write = number_write - 1;
     auto& chan = m_bdat->uart_channels[m_index];
     auto [d, mut, max_buffered] = [&] {
         switch (m_dir) {
@@ -186,11 +189,16 @@ std::size_t VirtualUartBuffer::write(std::span<const char> buf) noexcept {
     }();
     if (!mut.timed_lock(microsec_clock::universal_time() + boost::posix_time::seconds{1}))
         return 0;
-    std::lock_guard lg{mut, std::adopt_lock};
+    std::lock_guard
+        lg{mut, std::adopt_lock};
     const std::size_t count = std::min(
         std::clamp(max_buffered - d.size(), std::size_t{0}, static_cast<std::size_t>(max_buffered)), buf.size());
     std::copy_n(buf.begin(), count, std::back_inserter(d));
+    if (count > 0)
+        sem_write().release();
+    number_write = number_write + 1;
     return count;
+
 }
 
 [[nodiscard]] char VirtualUartBuffer::front() noexcept {
@@ -226,9 +234,6 @@ void VirtualUart::set_active(bool value) noexcept {
         m_bdat->uart_channels[m_index].active.store(value);
 }
 
-void VirtualUartBuffer::blocking_rw() noexcept {
-    blocked_rw = false;
-}
 
 [[nodiscard]] VirtualUart VirtualUarts::operator[](std::size_t idx) noexcept {
     if (!m_bdat || m_bdat->uart_channels.size() <= idx)

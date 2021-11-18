@@ -24,6 +24,8 @@
 #include <string_view>
 #include "SMCE/SMCE_iface.h"
 #include "SMCE/fwd.hpp"
+#include "semaphore"
+
 
 namespace smce {
 
@@ -127,7 +129,10 @@ class SMCE_API VirtualUartBuffer {
     BoardData* m_bdat;
     std::size_t m_index;
     Direction m_dir;
-    bool blocked_rw;
+    int number_write = 1;
+    int number_read = 1;
+    std::binary_semaphore sem_read();
+    std::binary_semaphore sem_write();
     constexpr VirtualUartBuffer(BoardData* bdat, std::size_t idx, Direction dir)
         : m_bdat{bdat}, m_index{idx}, m_dir{dir} {}
 
@@ -140,8 +145,9 @@ class SMCE_API VirtualUartBuffer {
     [[nodiscard]] std::size_t size() noexcept;
     std::size_t read(std::span<char>) noexcept;
     std::size_t write(std::span<const char>) noexcept;
+    bool readReady = false;
+    bool writeReady = false;
     [[nodiscard]] char front() noexcept;
-    void blocking_rw() noexcept;
 };
 
 constexpr bool operator==(const VirtualUartBuffer& lhs, const VirtualUartBuffer& rhs) noexcept {
