@@ -172,6 +172,7 @@ std::size_t VirtualUartBuffer::read(std::span<char> buf) noexcept {
 std::size_t VirtualUartBuffer::write(std::span<const char> buf) noexcept {
     if (!exists())
         return 0;
+    empty_size.wait(buf.size());
     auto& chan = m_bdat->uart_channels[m_index];
     auto [d, mut, max_buffered] = [&] {
         switch (m_dir) {
@@ -182,7 +183,6 @@ std::size_t VirtualUartBuffer::write(std::span<const char> buf) noexcept {
         }
         unreachable(); // GCOV_EXCL_LINE
     }();
-    empty_size.wait(d.size());
     if (!mut.timed_lock(microsec_clock::universal_time() + boost::posix_time::seconds{1}))
         return 0;
     std::lock_guard
