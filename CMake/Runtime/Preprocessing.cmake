@@ -52,22 +52,34 @@ foreach (LIB ${SKETCH_LINK_LIBS})
   if (NOT TARGET "${LIB}")
     continue ()
   endif ()
-  get_target_property (LIB_INCLUDE_DIRS "${LIB}" INCLUDE_DIRECTORIES)
-  if (LIB_INCLUDE_DIRS)
-    list (APPEND INCLUDE_DIRS ${LIB_INCLUDE_DIRS})
-  endif ()
-  get_target_property (LIB_COMP_DEFS "${LIB}" COMPILE_DEFINITIONS)
-  if (LIB_COMP_DEFS)
-    list (APPEND COMP_DEFS ${LIB_COMP_DEFS})
-  endif ()
-  get_target_property (LIB_INCLUDE_DIRS "${LIB}" INTERFACE_INCLUDE_DIRECTORIES)
-  if (LIB_INCLUDE_DIRS)
-    list (APPEND INCLUDE_DIRS ${LIB_INCLUDE_DIRS})
-  endif ()
-  get_target_property (LIB_COMP_DEFS "${LIB}" INTERFACE_COMPILE_DEFINITIONS)
-  if (LIB_COMP_DEFS)
-    list (APPEND COMP_DEFS ${LIB_COMP_DEFS})
-  endif ()
+  get_target_property (target_type "${LIB}" TYPE)
+  if (target_type STREQUAL "INTERFACE_LIBRARY")
+    get_target_property (LIB_INCLUDE_DIRS "${LIB}" INTERFACE_INCLUDE_DIRECTORIES)
+    if (LIB_INCLUDE_DIRS)
+      list (APPEND INCLUDE_DIRS ${LIB_INCLUDE_DIRS})
+    endif ()
+    get_target_property (LIB_COMP_DEFS "${LIB}" INTERFACE_COMPILE_DEFINITIONS)
+    if (LIB_COMP_DEFS)
+      list (APPEND COMP_DEFS ${LIB_COMP_DEFS})
+    endif ()
+  else ()
+    get_target_property (LIB_INCLUDE_DIRS "${LIB}" INCLUDE_DIRECTORIES)
+    if (LIB_INCLUDE_DIRS)
+      list (APPEND INCLUDE_DIRS ${LIB_INCLUDE_DIRS})
+    endif ()
+    get_target_property (LIB_COMP_DEFS "${LIB}" COMPILE_DEFINITIONS)
+    if (LIB_COMP_DEFS)
+      list (APPEND COMP_DEFS ${LIB_COMP_DEFS})
+    endif ()
+    get_target_property (LIB_INCLUDE_DIRS "${LIB}" INTERFACE_INCLUDE_DIRECTORIES)
+    if (LIB_INCLUDE_DIRS)
+      list (APPEND INCLUDE_DIRS ${LIB_INCLUDE_DIRS})
+    endif ()
+    get_target_property (LIB_COMP_DEFS "${LIB}" INTERFACE_COMPILE_DEFINITIONS)
+    if (LIB_COMP_DEFS)
+      list (APPEND COMP_DEFS ${LIB_COMP_DEFS})
+    endif ()
+  endif()
 endforeach ()
 
 set (INCDIR_FLAGS "")
@@ -91,7 +103,7 @@ elseif (MSVC)
   string (APPEND EXTRA_FLAGS " -fms-extensions")
 endif ()
 
-string (APPEND EXTRA_FLAGS " -nostdinc -nostdinc++ -include Arduino.h -ferror-limit=0")
+string (APPEND EXTRA_FLAGS " -nostdinc -nostdinc++ -include Arduino.h")
 
 file (WRITE "${PROJECT_BINARY_DIR}/ArduinoSourceBuild.cmake" "execute_process (COMMAND \"${ARDPRE_EXECUTABLE}\" \"${SKETCH_DIR}\" ${COMPDEF_FLAGS} ${INCDIR_FLAGS} ${EXTRA_FLAGS} ${CMAKE_CXX_FLAGS} RESULT_VARIABLE ARDPRE_EXITCODE OUTPUT_FILE \"${PROJECT_SOURCE_DIR}/sketch.cpp\")\n")
 file (APPEND "${PROJECT_BINARY_DIR}/ArduinoSourceBuild.cmake" [[
@@ -101,9 +113,9 @@ file (APPEND "${PROJECT_BINARY_DIR}/ArduinoSourceBuild.cmake" [[
 ]])
 
 add_custom_command (OUTPUT "${PROJECT_SOURCE_DIR}/sketch.cpp"
-    COMMAND "${CMAKE_COMMAND}" -E env ARDUINO_PRELUDE_DUMP_COMPOSITE=1 "${CMAKE_COMMAND}" -P "${PROJECT_BINARY_DIR}/ArduinoSourceBuild.cmake"
-    DEPENDS ${SKETCH_SOURCE_FILES}
-    COMMENT "Preprocessing sketch \"${SKETCH_DIR}\""
-)
+        COMMAND "${CMAKE_COMMAND}" -E env ARDUINO_PRELUDE_DUMP_COMPOSITE=1 "${CMAKE_COMMAND}" -P "${PROJECT_BINARY_DIR}/ArduinoSourceBuild.cmake"
+        DEPENDS ${SKETCH_SOURCE_FILES}
+        COMMENT "Preprocessing sketch \"${SKETCH_DIR}\""
+        )
 
 target_sources (Sketch PRIVATE "${PROJECT_SOURCE_DIR}/sketch.cpp")
