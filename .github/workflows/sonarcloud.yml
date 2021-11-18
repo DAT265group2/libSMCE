@@ -4,7 +4,7 @@ on:
     branches:
       - master
       - Tanya_CC
-      - ia3_tanya
+      - devel
 
   pull_request:
     types: [opened, synchronize, reopened]
