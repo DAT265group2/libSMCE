@@ -25,6 +25,7 @@
 #define PATCHES_PATH SMCE_TEST_DIR "/patches/"
 #define STORAGE_PATH SMCE_TEST_DIR "/storage/"
 #define MANIFESTS_PATH SMCE_TEST_DIR "/manifests/"
+#define CACHED_DOWNLOADS_PATH SMCE_PATH "/cached_downloads/"
 
 #include <thread>
 
