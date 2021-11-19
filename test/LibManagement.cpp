@@ -224,6 +224,7 @@ TEST_CASE("Invalid plugin dependency processing (cycle check)", "[Plugin]") {
     }
     REQUIRE(ec);
     REQUIRE(found != std::string::npos);
+}
 
 TEST_CASE("Valid download caching", "[Plugin]") {
     smce::Toolchain tc{SMCE_PATH};
