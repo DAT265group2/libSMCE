@@ -99,8 +99,7 @@ TEST_CASE("Valid manifests processing", "[Plugin]") {
     const char* const generator =
         generator_override ? generator_override : (!bp::search_path("ninja").empty() ? "Ninja" : "");
 #endif
-
-    constexpr auto module_path = SMCE_PATH "/RtResources/SMCE/share/CMake/Modules/ProcessManifests.cmake";
+    constexpr auto module_path = SMCE_PATH "/RtResources/SMCE/share/CMake/Modules/";
     const std::filesystem::path tmproot = SMCE_PATH "/tmp";
 
     const auto id = smce::Uuid::generate();
@@ -151,19 +150,20 @@ TEST_CASE("Valid manifests processing", "[Plugin]") {
             empty_source << "# empty\n";
             std::ofstream loader{base_dir / "CMakeLists.txt"};
             loader << "cmake_minimum_required (VERSION 3.12)\n";
+            loader << "list (APPEND CMAKE_MODULE_PATH \"" << module_path << "\")\n";
             loader << "project (Test)\n";
             loader << "add_library (Ardrivo INTERFACE)\n";
             loader << "add_executable (Sketch empty.cxx)\n";
-            loader << "include (\"" << module_path << "\")\n";
+            loader << "include (ProcessManifests)\n";
             loader << cmake_require_target("smce_plugin_ESP32_AnalogWrite");
         }
 
-        const auto res =
-            bp::system(bp::shell, bp::start_dir(base_dir.generic_string()),
+        const auto res = bp::system(bp::shell, bp::start_dir(base_dir.generic_string()),
 #if !BOOST_OS_WINDOWS
-                       bp::env["CMAKE_GENERATOR"] = generator,
+                                    bp::env["CMAKE_GENERATOR"] = generator,
 #endif
-                       "cmake", "--log-level=DEBUG", "-S", ".", "-B", "build", (bp::std_out & bp::std_err) > stderr);
+                                    "cmake", "--log-level=DEBUG", "-DSMCE_DIR=" SMCE_PATH, "-S", ".", "-B", "build",
+                                    (bp::std_out & bp::std_err) > stderr);
         REQUIRE(res == 0);
     }
 }
@@ -224,6 +224,48 @@ TEST_CASE("Invalid plugin dependency processing (cycle check)", "[Plugin]") {
     }
     REQUIRE(ec);
     REQUIRE(found != std::string::npos);
+
+TEST_CASE("Valid download caching", "[Plugin]") {
+    smce::Toolchain tc{SMCE_PATH};
+    REQUIRE(!tc.check_suitable_environment());
+
+    const auto cached_downloads_path = SMCE_PATH "/cached_downloads/";
+
+    if (std::filesystem::exists(cached_downloads_path)) {
+        [[maybe_unused]] std::error_code ec;
+        std::filesystem::remove_all(cached_downloads_path, ec);
+    }
+
+    std::array<std::string_view, 3> uris = {"https://github.com/ERROPiX/ESP32_AnalogWrite/archive/refs/tags/0.2.zip",
+                                            "https://github.com/ERROPiX/ESP32_AnalogWrite/archive/refs/tags/0.1.zip",
+                                            "https://github.com/ERROPiX/ESP32_AnalogWrite/archive/refs/tags/0.2.zip"};
+
+    std::array<std::string_view, 3> versions = {"0.2", "0.1", "0.2"};
+    std::vector<smce::PluginManifest> plugins;
+
+    for (int i = 0; i < uris.size(); i++) {
+        std::vector<smce::PluginManifest> plugins{
+            smce::PluginManifest{.name = "ESP32_AnalogWrite",
+                                 .version = std::string{versions[i]},
+                                 .uri = std::string{uris[i]},
+                                 .defaults = smce::PluginManifest::Defaults::none}};
+
+        smce::SketchConfig skc{.fqbn = "arduino:avr:nano", .plugins = std::move(plugins)};
+
+        smce::Sketch sk{SKETCHES_PATH "noop", std::move(skc)};
+
+        const auto ec = tc.compile(sk);
+        if (ec)
+            std::cerr << tc.build_log().second;
+
+        REQUIRE_FALSE(ec);
+    }
+
+    [[maybe_unused]] std::error_code ec;
+    std::size_t count = std::filesystem::remove_all(cached_downloads_path, ec) - 1;
+    REQUIRE_FALSE(ec);
+
+    REQUIRE(count == 2);
 }
 
 #if SMCE_ARDRIVO_MQTT

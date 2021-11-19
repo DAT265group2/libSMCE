@@ -115,6 +115,7 @@ macro (setup_smce_resources)
   copy_runtime_module (Preprocessing)
   copy_runtime_module (ProcessManifests)
   copy_runtime_module (ProbeCompilerIncdirs)
+  copy_runtime_module (DownloadCacher)
   copy_runtime_module (UseHighestCxxStandard)
 
   file (MAKE_DIRECTORY "${SMCE_RTRES_DIR}/Ardrivo")
