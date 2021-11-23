@@ -123,8 +123,8 @@ struct SMCE_INTERNAL BoardData {
     };
     struct SMCE_INTERNAL UartChannel {
         IpcAtomicValue<bool> active = false; // rw
-        boost::atomic<std::size_t> original_size;
-        boost::atomic<std::size_t> empty_size = 0;
+        IpcAtomicValue<std::size_t> original_size;
+        IpcAtomicValue<std::size_t> empty_size;
         IpcMovableMutex rx_mut;
         IpcMovableMutex tx_mut;
         boost::interprocess::deque<char, ShmAllocator<char>> rx; // rw
