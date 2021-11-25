@@ -19,6 +19,7 @@ include_guard ()
 
 set (SMCE_LIBRARY_TYPES "SHARED" "STATIC")
 set (SMCE_EXTENDED_LIBRARY_TYPES "AUTO" ${SMCE_LIBRARY_TYPES} "SOURCE")
+set (SMCE_CPACK_PROFILE "WiX")
 
 option (SMCE_BUILD_SHARED "Set to \"Off\" to disable building the shared library" On)
 option (SMCE_BUILD_STATIC "Set to \"Off\" to disable building the static library" On)
