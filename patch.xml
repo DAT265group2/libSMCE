@@ -1,0 +1,5 @@
+<CPackWiXPatch>
+    <CPackWiXFragment Id="CM_CP_bin.SMCE.dll">
+        <Environment Id='UpdatePath' Name='PATH' Action='set' Permanent='no' System='yes' Part='last' Value='[INSTALL_ROOT]bin\SMCE.dll' />
+    </CPackWiXFragment>
+</CPackWiXPatch>

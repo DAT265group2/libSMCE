@@ -185,6 +185,7 @@ if (SMCE_BUILD_STATIC)
       PUBLIC iSMCE
   )
   if (WIN32)
+    set (SMCE_CPACK_PROFILE "WiX")
     target_compile_definitions (SMCE_static INTERFACE SMCE_WIN32_LINK_STATIC)
   endif ()
   set_property (TARGET SMCE_static PROPERTY INTERFACE_SMCE_MAJOR_VERSION "${PROJECT_VERSION_MAJOR}")

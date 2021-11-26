@@ -296,6 +296,9 @@ jobs:
         run: |
           mkdir build
           cmake -G Ninja `
+            -DCMAKE_BUILD_TYPE=Release `
+            -DSMCEGD_BUNDLE_DEPS=True `
+            -DSMCE_CPACK_PROFILE=WiX `
             -DBOOST_ROOT=C:\local\boost_${{ matrix.boost.slug }} `
             -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} `
             -DSMCE_CXXRT_LINKING=SHARED `
@@ -314,6 +317,9 @@ jobs:
         run: |
           mkdir ./build/packages
           cd build
+          cmake -DCPACK_PACKAGE_DIRECTORY="packages" .
+          cmake --build . --target package
+          cmake -DGODOT_DEBUG=On -DCPACK_PACKAGE_DIRECTORY="packages" .
           cmake --build . --target package
           rm -R packages/_CPack_Packages
           cd ..
