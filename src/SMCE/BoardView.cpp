@@ -163,13 +163,12 @@ std::size_t VirtualUartBuffer::read(std::span<char> buf) noexcept {
         return 0;
     std::lock_guard lg{mut, std::adopt_lock};
 
-    if (chan.buffer_size_rx.load() == 0){
-        std::unique_lock <std::mutex> lck(chan.buf_mux);
+    if (d.size() == 0){
         switch(m_dir){
         case Direction::rx:
-            chan.cv_rx.wait(lck, [&]{return chan.buffer_size_rx.load() != 0;});
+            chan.buffer_size_rx.wait(0);
         case Direction::tx:
-            chan.cv_tx.wait(lck, [&]{return chan.buffer_size_tx.load() != 0;});
+            chan.buffer_size_tx.wait(0);
         }
     }
 
@@ -181,10 +180,10 @@ std::size_t VirtualUartBuffer::read(std::span<char> buf) noexcept {
         switch(m_dir){
         case Direction::rx:
             chan.buffer_size_rx.store(d.size());
-            chan.cv_rx.notify_one();
+            chan.buffer_size_rx.notify_one();
         case Direction::tx:
             chan.buffer_size_tx.store(d.size());
-            chan.cv_tx.notify_one();
+            chan.buffer_size_tx.notify_one();
         }
     }
 
@@ -210,12 +209,11 @@ std::size_t VirtualUartBuffer::write(std::span<const char> buf) noexcept {
     std::lock_guard lg{mut, std::adopt_lock};
 
     if (d.size() == max_buffered){
-        std::unique_lock <std::mutex> lck(chan.buf_mux);
         switch(m_dir){
         case Direction::rx:
-            chan.cv_rx.wait(lck, [&]{return chan.buffer_size_rx != max_size();});
+            chan.buffer_size_rx.wait(max_buffered);
         case Direction::tx:
-            chan.cv_tx.wait(lck, [&]{return chan.buffer_size_tx != max_size();});
+            chan.buffer_size_tx.wait(max_buffered);
         }
     }
 
@@ -227,10 +225,10 @@ std::size_t VirtualUartBuffer::write(std::span<const char> buf) noexcept {
         switch(m_dir){
         case Direction::rx:
             chan.buffer_size_rx.store(d.size());
-            chan.cv_rx.notify_one();
+            chan.buffer_size_rx.notify_one();
         case Direction::tx:
             chan.buffer_size_tx.store(d.size());
-            chan.cv_tx.notify_one();
+            chan.buffer_size_tx.notify_one();
         }
     }
 

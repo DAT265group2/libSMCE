@@ -27,7 +27,6 @@
 #include <memory>
 #include <optional>
 #include <vector>
-#include <condition_variable>
 
 #include <boost/predef.h>
 
@@ -124,9 +123,6 @@ struct SMCE_INTERNAL BoardData {
     };
     struct SMCE_INTERNAL UartChannel {
         IpcAtomicValue<bool> active = false; // rw
-        std::condition_variable cv_rx;
-        std::condition_variable cv_tx;
-        std::mutex buf_mux;
         IpcAtomicValue<std::size_t> buffer_size_rx = 0;
         IpcAtomicValue<std::size_t> buffer_size_tx = 0;
         IpcMovableMutex rx_mut;
