@@ -145,8 +145,8 @@ VirtualPin VirtualPins::operator[](std::size_t pin_id) noexcept {
     return ret;
 }
 
-std::size_t VirtualUartBuffer::read(std::span<char> buf) noexcept {
-    if (!exists())
+/*std::size_t VirtualUartBuffer::blocking_read(std::span<char> buf) noexcept {
+*//*    if (!exists())
         return 0;
     auto& chan = m_bdat->uart_channels[m_index];
     auto [d, mut, max_buffered, buf_cp] = [&] {
@@ -158,21 +158,76 @@ std::size_t VirtualUartBuffer::read(std::span<char> buf) noexcept {
         }
         unreachable(); // GCOV_EXCL_LINE
     }();
-    if (!mut.timed_lock(microsec_clock::universal_time() + boost::posix_time::seconds{1}))
-        return 0;
     buf_cp.wait(0);
 
+    std::size_t count = 0;
+    if (!mut.try_lock()) {
+        return 0;
+    } else {
+        count = std::min(d.size(), buf.size());
+        std::copy_n(d.begin(), count, buf.begin());
+        d.erase(d.begin(), d.begin() + count);
+        if (count != 0 ) {
+            buf_cp.store(88);
+            buf_cp.notify_all();
+        }
+        mut.unlock();
+        return count;
+    }*//*
+}*/
+
+/*std::size_t VirtualUartBuffer::blocking_write(std::span<const char> buf) noexcept {
+*//*    if (!exists())
+        return 0;
+    auto& chan = m_bdat->uart_channels[m_index];
+    auto [d, mut, max_buffered, buf_cp] = [&] {
+        switch (m_dir) {
+        case Direction::rx:
+            return std::tie(chan.rx, chan.rx_mut, chan.max_buffered_rx, chan.buffer_size_rx);
+        case Direction::tx:
+            return std::tie(chan.tx, chan.tx_mut, chan.max_buffered_tx, chan.buffer_size_tx);
+        }
+        unreachable(); // GCOV_EXCL_LINE
+    }();
+
+    buf_cp.wait(static_cast<std::size_t>(max_buffered));
+
+    if (!mut.try_lock()) {
+        return 0;
+    } else {
+        const std::size_t count
+            = std::min(
+              std::clamp(max_buffered - d.size(), std::size_t{0}, static_cast<std::size_t>(max_buffered)),
+                 buf.size());
+        std::copy_n(buf.begin(), count, std::back_inserter(d));
+
+        if (count != 0 ) {
+             buf_cp.store(77);
+             buf_cp.notify_all();
+        }
+        return count;
+    }*//*
+}*/
+
+std::size_t VirtualUartBuffer::read(std::span<char> buf) noexcept {
+    if (!exists())
+        return 0;
+    auto& chan = m_bdat->uart_channels[m_index];
+    auto [d, mut, max_buffered] = [&] {
+        switch (m_dir) {
+        case Direction::rx:
+            return std::tie(chan.rx, chan.rx_mut, chan.max_buffered_rx);
+        case Direction::tx:
+            return std::tie(chan.tx, chan.tx_mut, chan.max_buffered_tx);
+        }
+        unreachable(); // GCOV_EXCL_LINE
+    }();
+    if (!mut.timed_lock(microsec_clock::universal_time() + boost::posix_time::seconds{1}))
+        return 0;
     std::lock_guard lg{mut, std::adopt_lock};
     const std::size_t count = std::min(d.size(), buf.size());
     std::copy_n(d.begin(), count, buf.begin());
     d.erase(d.begin(), d.begin() + count);
-
-    if (count != 0) {
-        m_dir == Direction::rx
-            ? m_bdat->uart_channels[m_index].buffer_size_rx.store(d.size())
-            : m_bdat->uart_channels[m_index].buffer_size_tx.store(d.size());
-        buf_cp.notify_all();
-    }
 
     return count;
 }
@@ -181,31 +236,21 @@ std::size_t VirtualUartBuffer::write(std::span<const char> buf) noexcept {
     if (!exists())
         return 0;
     auto& chan = m_bdat->uart_channels[m_index];
-    auto [d, mut, max_buffered, buf_cp] = [&] {
+    auto [d, mut, max_buffered] = [&] {
         switch (m_dir) {
         case Direction::rx:
-            return std::tie(chan.rx, chan.rx_mut, chan.max_buffered_rx, chan.buffer_size_rx);
+            return std::tie(chan.rx, chan.rx_mut, chan.max_buffered_rx);
         case Direction::tx:
-            return std::tie(chan.tx, chan.tx_mut, chan.max_buffered_tx, chan.buffer_size_tx);
+            return std::tie(chan.tx, chan.tx_mut, chan.max_buffered_tx);
         }
         unreachable(); // GCOV_EXCL_LINE
     }();
     if (!mut.timed_lock(microsec_clock::universal_time() + boost::posix_time::seconds{1}))
         return 0;
-    buf_cp.wait(max_buffered);
-
     std::lock_guard lg{mut, std::adopt_lock};
     const std::size_t count = std::min(
         std::clamp(max_buffered - d.size(), std::size_t{0}, static_cast<std::size_t>(max_buffered)), buf.size());
     std::copy_n(buf.begin(), count, std::back_inserter(d));
-
-    if (count != 0) {
-        m_dir == Direction::rx
-            ? m_bdat->uart_channels[m_index].buffer_size_rx.store(d.size())
-            : m_bdat->uart_channels[m_index].buffer_size_tx.store(d.size());
-        buf_cp.notify_all();
-    }
-
     return count;
 }
 

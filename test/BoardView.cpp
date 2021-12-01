@@ -129,6 +129,7 @@ TEST_CASE("BoardView UART", "[BoardView]") {
     REQUIRE(uart0.tx().front() == '\0');
     REQUIRE(uart0.tx().size() == 0);
     REQUIRE(in == out);
+    REQUIRE(in.front() == 'H');
 
 #if !MSVC_DEBUG
     std::reverse(out.begin(), out.end());
