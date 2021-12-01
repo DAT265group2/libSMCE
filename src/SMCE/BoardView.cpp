@@ -209,7 +209,7 @@ std::size_t VirtualUartBuffer::write(std::span<const char> buf) noexcept {
     std::lock_guard lg{mut, std::adopt_lock};
 
     if (d.size() == max_buffered){
-        switch(m_dir){
+        switch (m_dir) {
         case Direction::rx:
             chan.buffer_size_rx.wait(max_buffered);
         case Direction::tx:
@@ -222,7 +222,7 @@ std::size_t VirtualUartBuffer::write(std::span<const char> buf) noexcept {
     std::copy_n(buf.begin(), count, std::back_inserter(d));
 
     if (count != 0){
-        switch(m_dir){
+        switch (m_dir) {
         case Direction::rx:
             chan.buffer_size_rx.store(d.size());
             chan.buffer_size_rx.notify_one();
