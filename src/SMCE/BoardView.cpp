@@ -149,6 +149,8 @@ VirtualPin VirtualPins::operator[](std::size_t pin_id) noexcept {
 std::size_t VirtualUartBuffer::blocking_read(std::span<char> buf) noexcept {
     if (!exists())
         return 0;
+    std::cout << "blocking_read" << std::endl;
+
     auto& chan = m_bdat->uart_channels[m_index];
     auto [d, mut, max_buffered, buf_cp] = [&] {
         switch (m_dir) {
@@ -159,7 +161,7 @@ std::size_t VirtualUartBuffer::blocking_read(std::span<char> buf) noexcept {
         }
         unreachable(); // GCOV_EXCL_LINE
     }();
-    std::cout << buf_cp << std::endl;
+    std::cout << "buf_cp: " << buf_cp << std::endl;
     buf_cp.wait(0);
     std::size_t count = 0;
     if (!mut.try_lock()) {
@@ -173,6 +175,7 @@ std::size_t VirtualUartBuffer::blocking_read(std::span<char> buf) noexcept {
             buf_cp.notify_all();
         }
         mut.unlock();
+        std::cout << "buf_cp: " << buf_cp << std::endl;
         return count;
     }
 }
@@ -180,6 +183,7 @@ std::size_t VirtualUartBuffer::blocking_read(std::span<char> buf) noexcept {
 std::size_t VirtualUartBuffer::blocking_write(std::span<const char> buf) noexcept {
     if (!exists())
         return 0;
+    std::cout << "blocking_write" << std::endl;
     auto& chan = m_bdat->uart_channels[m_index];
     auto [d, mut, max_buffered, buf_cp] = [&] {
         switch (m_dir) {
@@ -190,7 +194,7 @@ std::size_t VirtualUartBuffer::blocking_write(std::span<const char> buf) noexcep
         }
         unreachable(); // GCOV_EXCL_LINE
     }();
-    std::cout << buf_cp << std::endl;
+    std::cout << "buf_cp: " << buf_cp << std::endl;
 
     buf_cp.wait(static_cast<std::size_t>(max_buffered));
 
@@ -207,6 +211,7 @@ std::size_t VirtualUartBuffer::blocking_write(std::span<const char> buf) noexcep
              buf_cp.store(77);
              buf_cp.notify_all();
         }
+        std::cout << "buf_cp: " << buf_cp << std::endl;
         return count;
     }
 }
