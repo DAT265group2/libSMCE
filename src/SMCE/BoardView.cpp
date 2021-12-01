@@ -161,34 +161,13 @@ std::size_t VirtualUartBuffer::read(std::span<char> buf) noexcept {
     }();
     if (!mut.timed_lock(microsec_clock::universal_time() + boost::posix_time::seconds{1}))
         return 0;
+    chan.buffer_size_rx.wait(0);
+
     std::lock_guard lg{mut, std::adopt_lock};
-
-    /*if (d.size() == 0){
-        switch(m_dir){
-        case Direction::rx:
-            chan.buffer_size_rx.wait(0);
-        case Direction::tx:
-            chan.buffer_size_tx.wait(0);
-        }
-    }*/
-    if (d.size() == 0) {
-        chan.buffer_size_rx.wait(0);
-    }
-
     const std::size_t count = std::min(d.size(), buf.size());
     std::copy_n(d.begin(), count, buf.begin());
     d.erase(d.begin(), d.begin() + count);
 
-    /*if (count != 0){
-        switch(m_dir){
-        case Direction::rx:
-            chan.buffer_size_rx.store(d.size());
-            chan.buffer_size_rx.notify_one();
-        case Direction::tx:
-            chan.buffer_size_tx.store(d.size());
-            chan.buffer_size_tx.notify_one();
-        }
-    }*/
     if (count != 0) {
         chan.buffer_size_rx.store(d.size());
         chan.buffer_size_rx.notify_one();
@@ -213,34 +192,12 @@ std::size_t VirtualUartBuffer::write(std::span<const char> buf) noexcept {
     if (!mut.timed_lock(microsec_clock::universal_time() + boost::posix_time::seconds{1}))
         return 0;
 
+    chan.buffer_size_rx.wait(max_buffered);
+
     std::lock_guard lg{mut, std::adopt_lock};
-
-    /*if (d.size() == max_buffered){
-        switch (m_dir) {
-        case Direction::rx:
-            chan.buffer_size_rx.wait(max_buffered);
-        case Direction::tx:
-            chan.buffer_size_tx.wait(max_buffered);
-        }
-    }*/
-    if (d.size() == max_buffered) {
-        chan.buffer_size_rx.wait(max_buffered);
-    }
-
     const std::size_t count = std::min(
         std::clamp(max_buffered - d.size(), std::size_t{0}, static_cast<std::size_t>(max_buffered)), buf.size());
     std::copy_n(buf.begin(), count, std::back_inserter(d));
-
-    /*if (count != 0){
-        switch (m_dir) {
-        case Direction::rx:
-            chan.buffer_size_rx.store(d.size());
-            chan.buffer_size_rx.notify_one();
-        case Direction::tx:
-            chan.buffer_size_tx.store(d.size());
-            chan.buffer_size_tx.notify_one();
-        }
-    }*/
 
     if (count != 0) {
         chan.buffer_size_rx.store(d.size());
