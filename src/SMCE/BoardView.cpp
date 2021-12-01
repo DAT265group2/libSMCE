@@ -149,7 +149,6 @@ std::size_t VirtualUartBuffer::read(std::span<char> buf) noexcept {
     if (!exists())
         return 0;
     auto& chan = m_bdat->uart_channels[m_index];
-
     auto [d, mut, max_buffered, buf_cp] = [&] {
         switch (m_dir) {
         case Direction::rx:
@@ -161,7 +160,7 @@ std::size_t VirtualUartBuffer::read(std::span<char> buf) noexcept {
     }();
     if (!mut.timed_lock(microsec_clock::universal_time() + boost::posix_time::seconds{1}))
         return 0;
-    buf_cp.wait(11111);
+    buf_cp.wait(0);
 
     std::lock_guard lg{mut, std::adopt_lock};
     const std::size_t count = std::min(d.size(), buf.size());
@@ -169,7 +168,9 @@ std::size_t VirtualUartBuffer::read(std::span<char> buf) noexcept {
     d.erase(d.begin(), d.begin() + count);
 
     if (count != 0) {
-        buf_cp.store(d.size());
+        m_dir == Direction::rx
+            ? m_bdat->uart_channels[m_index].buffer_size_rx.store(d.size())
+            : m_bdat->uart_channels[m_index].buffer_size_tx.store(d.size());
         buf_cp.notify_all();
     }
 
@@ -199,7 +200,9 @@ std::size_t VirtualUartBuffer::write(std::span<const char> buf) noexcept {
     std::copy_n(buf.begin(), count, std::back_inserter(d));
 
     if (count != 0) {
-        buf_cp.store(d.size());
+        m_dir == Direction::rx
+            ? m_bdat->uart_channels[m_index].buffer_size_rx.store(d.size())
+            : m_bdat->uart_channels[m_index].buffer_size_tx.store(d.size());
         buf_cp.notify_all();
     }
 
