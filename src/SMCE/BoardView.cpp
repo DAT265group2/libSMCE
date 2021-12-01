@@ -25,6 +25,7 @@
 #include <boost/date_time/posix_time/ptime.hpp>
 #include "SMCE/internal/BoardData.hpp"
 #include "SMCE/internal/utils.hpp"
+#include <iostream>
 
 using microsec_clock = boost::date_time::microsec_clock<boost::posix_time::ptime>;
 
@@ -158,8 +159,8 @@ std::size_t VirtualUartBuffer::blocking_read(std::span<char> buf) noexcept {
         }
         unreachable(); // GCOV_EXCL_LINE
     }();
+    std::cout << buf_cp << std::endl;
     buf_cp.wait(0);
-
     std::size_t count = 0;
     if (!mut.try_lock()) {
         return 0;
@@ -189,6 +190,7 @@ std::size_t VirtualUartBuffer::blocking_write(std::span<const char> buf) noexcep
         }
         unreachable(); // GCOV_EXCL_LINE
     }();
+    std::cout << buf_cp << std::endl;
 
     buf_cp.wait(static_cast<std::size_t>(max_buffered));
 
