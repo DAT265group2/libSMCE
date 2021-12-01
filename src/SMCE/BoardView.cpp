@@ -145,8 +145,8 @@ VirtualPin VirtualPins::operator[](std::size_t pin_id) noexcept {
     return ret;
 }
 
-/*std::size_t VirtualUartBuffer::blocking_read(std::span<char> buf) noexcept {
-*//*    if (!exists())
+std::size_t VirtualUartBuffer::blocking_read(std::span<char> buf) noexcept {
+    if (!exists())
         return 0;
     auto& chan = m_bdat->uart_channels[m_index];
     auto [d, mut, max_buffered, buf_cp] = [&] {
@@ -173,11 +173,11 @@ VirtualPin VirtualPins::operator[](std::size_t pin_id) noexcept {
         }
         mut.unlock();
         return count;
-    }*//*
-}*/
+    }
+}
 
-/*std::size_t VirtualUartBuffer::blocking_write(std::span<const char> buf) noexcept {
-*//*    if (!exists())
+std::size_t VirtualUartBuffer::blocking_write(std::span<const char> buf) noexcept {
+    if (!exists())
         return 0;
     auto& chan = m_bdat->uart_channels[m_index];
     auto [d, mut, max_buffered, buf_cp] = [&] {
@@ -206,8 +206,8 @@ VirtualPin VirtualPins::operator[](std::size_t pin_id) noexcept {
              buf_cp.notify_all();
         }
         return count;
-    }*//*
-}*/
+    }
+}
 
 std::size_t VirtualUartBuffer::read(std::span<char> buf) noexcept {
     if (!exists())

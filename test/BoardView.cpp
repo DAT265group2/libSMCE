@@ -148,6 +148,47 @@ TEST_CASE("BoardView UART", "[BoardView]") {
     REQUIRE(br.stop());
 }
 
+TEST_CASE("BoardView Blocking I/O", "[BoardView]"){
+    smce::Toolchain tc{SMCE_PATH};
+    REQUIRE(!tc.check_suitable_environment());
+    smce::Sketch sk{SKETCHES_PATH "uart", {.fqbn = "arduino:avr:nano"}};
+    const auto ec = tc.compile(sk);
+    if (ec)
+        std::cerr << tc.build_log().second;
+    REQUIRE_FALSE(ec);
+    smce::Board br{};
+    REQUIRE(br.configure({.uart_channels = {{}}}));
+    REQUIRE(br.attach_sketch(sk));
+    REQUIRE(br.start());
+    auto bv = br.view();
+    REQUIRE(bv.valid());
+    auto uart0 = bv.uart_channels[0];
+    REQUIRE(uart0.exists());
+    REQUIRE(uart0.rx().exists());
+    REQUIRE(uart0.tx().exists());
+    auto uart1 = bv.uart_channels[1];
+    REQUIRE_FALSE(uart1.exists());
+    REQUIRE_FALSE(uart1.rx().exists());
+    REQUIRE_FALSE(uart1.tx().exists());
+    std::this_thread::sleep_for(1ms);
+
+    std::array out = {'H', 'E', 'L', 'L', 'O', ' ', 'U', 'A', 'R', 'T', '\0'};
+    std::array<char, out.size()> in{};
+    REQUIRE(uart0.rx().blocking_write(out) == out.size());
+    int ticks = 16'000;
+    do {
+        if (ticks-- == 0)
+            FAIL("Timed out");
+        std::this_thread::sleep_for(1ms);
+    } while (uart0.tx().size() != in.size());
+    REQUIRE(uart0.tx().front() == 'H');
+    REQUIRE(uart0.tx().blocking_read(in) == in.size());
+    REQUIRE(uart0.tx().front() == '\0');
+    REQUIRE(uart0.tx().size() == 0);
+    REQUIRE(in == out);
+    REQUIRE(in.front() == 'H');
+}
+
 constexpr auto div_ceil(std::size_t lhs, std::size_t rhs) { return lhs / rhs + !!(lhs % rhs); }
 
 constexpr std::byte operator""_b(char c) noexcept { return static_cast<std::byte>(c); }
