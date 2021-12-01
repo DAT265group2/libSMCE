@@ -72,7 +72,6 @@ BoardData::BoardData(const ShmAllocator<void>& shm_valloc, const BoardConfig& c)
         data.tx_pin_override = conf.tx_pin_override;
         data.max_buffered_rx = static_cast<std::uint16_t>(conf.rx_buffer_length);
         data.max_buffered_tx = static_cast<std::uint16_t>(conf.tx_buffer_length);
-        data.buffer_size_cp.store(0);
     }
 
     direct_storages.reserve(c.sd_cards.size());
