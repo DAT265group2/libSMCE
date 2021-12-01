@@ -130,17 +130,6 @@ TEST_CASE("BoardView UART", "[BoardView]") {
     REQUIRE(uart0.tx().size() == 0);
     REQUIRE(in == out);
 
-    std::array<char, out.size()> in1{};
-    std::thread task_read{[&]{
-        uart0.tx().read(in1);
-    }};
-
-    std::thread task_write{[&]{
-        REQUIRE(uart0.rx().write(out) == out.size());
-    }};
-    task_read.join();
-    task_write.join();
-
 #if !MSVC_DEBUG
     std::reverse(out.begin(), out.end());
     REQUIRE(uart0.rx().write(out) == out.size());

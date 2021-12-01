@@ -149,8 +149,7 @@ std::size_t VirtualUartBuffer::read(std::span<char> buf) noexcept {
     if (!exists())
         return 0;
     auto& chan = m_bdat->uart_channels[m_index];
-    chan.original_size = max_size();
-    chan.original_size.wait(buf.size());
+
     auto [d, mut, max_buffered] = [&] {
         switch (m_dir) {
         case Direction::rx:
@@ -160,12 +159,21 @@ std::size_t VirtualUartBuffer::read(std::span<char> buf) noexcept {
         }
         unreachable(); // GCOV_EXCL_LINE
     }();
+
     if (!mut.timed_lock(microsec_clock::universal_time() + boost::posix_time::seconds{1}))
         return 0;
     std::lock_guard lg{mut, std::adopt_lock};
+
+    if (d.size() == 0)
+        chan.buffer_size_cp.wait(0);
+
     const std::size_t count = std::min(d.size(), buf.size());
     std::copy_n(d.begin(), count, buf.begin());
     d.erase(d.begin(), d.begin() + count);
+
+    chan.buffer_size_cp.store(d.size());
+    chan.buffer_size_cp.notify_one();
+
     return count;
 }
 
@@ -173,7 +181,6 @@ std::size_t VirtualUartBuffer::write(std::span<const char> buf) noexcept {
     if (!exists())
         return 0;
     auto& chan = m_bdat->uart_channels[m_index];
-    chan.empty_size.wait(buf.size());
     auto [d, mut, max_buffered] = [&] {
         switch (m_dir) {
         case Direction::rx:
@@ -186,9 +193,17 @@ std::size_t VirtualUartBuffer::write(std::span<const char> buf) noexcept {
     if (!mut.timed_lock(microsec_clock::universal_time() + boost::posix_time::seconds{1}))
         return 0;
     std::lock_guard lg{mut, std::adopt_lock};
+
+    if (d.size() == max_buffered)
+        chan.buffer_size_cp.wait(max_buffered);
+
     const std::size_t count = std::min(
         std::clamp(max_buffered - d.size(), std::size_t{0}, static_cast<std::size_t>(max_buffered)), buf.size());
     std::copy_n(buf.begin(), count, std::back_inserter(d));
+
+    chan.buffer_size_cp.store(d.size());
+    chan.buffer_size_cp.notify_one();
+
     return count;
 }
 
