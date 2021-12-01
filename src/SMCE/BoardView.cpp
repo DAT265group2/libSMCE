@@ -161,29 +161,30 @@ std::size_t VirtualUartBuffer::read(std::span<char> buf) noexcept {
     }();
     if (!mut.timed_lock(microsec_clock::universal_time() + boost::posix_time::seconds{1}))
         return 0;
+    std::lock_guard lg{mut, std::adopt_lock};
 
-    if (d.size() == 0){
+    if (chan.buffer_size_rx.load() == 0){
+        std::unique_lock <std::mutex> lck(chan.buf_mux);
         switch(m_dir){
         case Direction::rx:
-            chan.buffer_size_rx.wait(0);
+            chan.cv_rx.wait(lck, [&]{return chan.buffer_size_rx.load() != 0;});
         case Direction::tx:
-            chan.buffer_size_tx.wait(0);
+            chan.cv_tx.wait(lck, [&]{return chan.buffer_size_tx.load() != 0;});
         }
     }
 
-    std::lock_guard lg{mut, std::adopt_lock};
     const std::size_t count = std::min(d.size(), buf.size());
     std::copy_n(d.begin(), count, buf.begin());
     d.erase(d.begin(), d.begin() + count);
 
-    if (d.size() == 0){
+    if (count != 0){
         switch(m_dir){
         case Direction::rx:
             chan.buffer_size_rx.store(d.size());
-            chan.buffer_size_rx.notify_one();
+            chan.cv_rx.notify_one();
         case Direction::tx:
             chan.buffer_size_tx.store(d.size());
-            chan.buffer_size_tx.notify_one();
+            chan.cv_tx.notify_one();
         }
     }
 
@@ -206,28 +207,30 @@ std::size_t VirtualUartBuffer::write(std::span<const char> buf) noexcept {
     if (!mut.timed_lock(microsec_clock::universal_time() + boost::posix_time::seconds{1}))
         return 0;
 
+    std::lock_guard lg{mut, std::adopt_lock};
+
     if (d.size() == max_buffered){
+        std::unique_lock <std::mutex> lck(chan.buf_mux);
         switch(m_dir){
         case Direction::rx:
-            chan.buffer_size_rx.wait(max_buffered);
+            chan.cv_rx.wait(lck, [&]{return chan.buffer_size_rx != max_size();});
         case Direction::tx:
-            chan.buffer_size_tx.wait(max_buffered);
+            chan.cv_tx.wait(lck, [&]{return chan.buffer_size_tx != max_size();});
         }
     }
 
-    std::lock_guard lg{mut, std::adopt_lock};
     const std::size_t count = std::min(
         std::clamp(max_buffered - d.size(), std::size_t{0}, static_cast<std::size_t>(max_buffered)), buf.size());
     std::copy_n(buf.begin(), count, std::back_inserter(d));
 
-    if (d.size() == 0){
+    if (count != 0){
         switch(m_dir){
         case Direction::rx:
             chan.buffer_size_rx.store(d.size());
-            chan.buffer_size_rx.notify_one();
+            chan.cv_rx.notify_one();
         case Direction::tx:
             chan.buffer_size_tx.store(d.size());
-            chan.buffer_size_tx.notify_one();
+            chan.cv_tx.notify_one();
         }
     }
 
