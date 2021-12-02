@@ -188,17 +188,17 @@ TEST_CASE("BoardView Blocking I/O", "[BoardView]"){
     REQUIRE(in == out);
     REQUIRE(in.front() == 'H');*/
 
-    std::thread t_read {[&]{
+    /*std::thread t_read {[&]{
         uart0.tx().blocking_read(in);
         REQUIRE(in == out);
-    }};
+    }};*/
 
     std::thread t_write {[&]{
-        std::this_thread::sleep_for(20ms);
+//        std::this_thread::sleep_for(20ms);
         REQUIRE(uart0.rx().blocking_write(out) == out.size());
     }};
 
-    t_read.join();
+//    t_read.join();
     t_write.join();
 }
 

@@ -164,6 +164,7 @@ std::size_t VirtualUartBuffer::blocking_read(std::span<char> buf) noexcept {
     std::cout << "buf_cp: " << buf_cp << std::endl;
     buf_cp.wait(0);
     if (!mut.try_lock()) {
+        std::cout << "read_enter_lock: " << buf_cp << std::endl;
         return 0;
     } else {
         const std::size_t count = std::min(d.size(), buf.size());
@@ -198,6 +199,7 @@ std::size_t VirtualUartBuffer::blocking_write(std::span<const char> buf) noexcep
     buf_cp.wait(static_cast<std::size_t>(max_buffered));
 
     if (!mut.try_lock()) {
+        std::cout << "write_enter_lock: " << buf_cp << std::endl;
         return 0;
     } else {
         const std::size_t count
