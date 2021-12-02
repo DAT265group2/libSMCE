@@ -210,6 +210,7 @@ std::size_t VirtualUartBuffer::blocking_write(std::span<const char> buf) noexcep
         std::copy_n(buf.begin(), count, std::back_inserter(d));
 
         if (count != 0 ) {
+             std::cout << "write_buf_cp != 0" << buf_cp << std::endl;
              buf_cp.store(d.size());
              buf_cp.notify_all();
         }
@@ -221,8 +222,10 @@ std::size_t VirtualUartBuffer::blocking_write(std::span<const char> buf) noexcep
 }
 
 std::size_t VirtualUartBuffer::read(std::span<char> buf) noexcept {
+    std::cout << "read0" << std::endl;
     if (!exists())
         return 0;
+    std::cout << "read1" << std::endl;
     auto& chan = m_bdat->uart_channels[m_index];
     auto [d, mut, max_buffered] = [&] {
         switch (m_dir) {
@@ -235,11 +238,12 @@ std::size_t VirtualUartBuffer::read(std::span<char> buf) noexcept {
     }();
     if (!mut.timed_lock(microsec_clock::universal_time() + boost::posix_time::seconds{1}))
         return 0;
+    std::cout << "read2" << std::endl;
     std::lock_guard lg{mut, std::adopt_lock};
     const std::size_t count = std::min(d.size(), buf.size());
     std::copy_n(d.begin(), count, buf.begin());
     d.erase(d.begin(), d.begin() + count);
-
+    std::cout << "read3" << std::endl;
     return count;
 }
 
