@@ -177,8 +177,6 @@ TEST_CASE("BoardView Blocking I/O", "[BoardView]"){
 
     uart0.rx().write(out);
     uart0.tx().read(in);
-    REQUIRE(uart0.rx().write(out) == out.size());
-    REQUIRE(uart0.tx().read(in) == in.size());
 
     /*std::thread task_read {[&]{
         REQUIRE(uart0.rx().read(in) == in.size());
