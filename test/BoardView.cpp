@@ -176,7 +176,8 @@ TEST_CASE("BoardView Blocking I/O", "[BoardView]"){
     std::array<char, out.size()> in{};
     REQUIRE(uart0.rx().blocking_write(out) == out.size());
     REQUIRE(uart0.rx().size() == in.size());
-    REQUIRE(uart0.rx().read(in) == in.size());
+    REQUIRE(uart0.tx().size() == in.size());
+    REQUIRE(uart0.tx().read(in) == in.size());
 
     /*std::thread task_read {[&]{
         REQUIRE(uart0.rx().read(in) == in.size());
@@ -186,7 +187,7 @@ TEST_CASE("BoardView Blocking I/O", "[BoardView]"){
         std::this_thread::sleep_for(20ms);
         REQUIRE(uart0.tx().write(out) == out.size());
     }}; */
-
+    REQUIRE(br.stop());
 }
 
 constexpr auto div_ceil(std::size_t lhs, std::size_t rhs) { return lhs / rhs + !!(lhs % rhs); }
