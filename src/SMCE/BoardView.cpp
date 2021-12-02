@@ -130,19 +130,24 @@ VirtualPin VirtualPins::operator[](std::size_t pin_id) noexcept {
     if (!exists())
         return 0;
     auto& chan = m_bdat->uart_channels[m_index];
-    auto [d, mut] = [&] {
+    auto [d, mut, s_b] = [&] {
         switch (m_dir) {
         case Direction::rx:
-            return std::tie(chan.rx, chan.rx_mut);
+            return std::tie(chan.rx, chan.rx_mut, chan.buffer_size_rx);
         case Direction::tx:
-            return std::tie(chan.tx, chan.tx_mut);
+            return std::tie(chan.tx, chan.tx_mut, chan.buffer_size_rx);
         }
         unreachable(); // GCOV_EXCL_LINE
     }();
+
+    std::cout << "size, before getting lock" << std::endl;
+    std::cout << "size--" << s_b << std::endl;
+
     if (!mut.timed_lock(microsec_clock::universal_time() + boost::posix_time::seconds{1}))
         return 0;
     std::lock_guard lg{mut, std::adopt_lock};
     const auto ret = d.size();
+    std::cout << "size, after getting lock" << std::endl;
     return ret;
 }
 
