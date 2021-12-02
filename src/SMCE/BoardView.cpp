@@ -139,15 +139,10 @@ VirtualPin VirtualPins::operator[](std::size_t pin_id) noexcept {
         }
         unreachable(); // GCOV_EXCL_LINE
     }();
-
-    std::cout << "size, before getting lock" << std::endl;
-    std::cout << "size--" << s_b << std::endl;
-
     if (!mut.timed_lock(microsec_clock::universal_time() + boost::posix_time::seconds{1}))
         return 0;
     std::lock_guard lg{mut, std::adopt_lock};
     const auto ret = d.size();
-    std::cout << "size, after getting lock" << std::endl;
     return ret;
 }
 
@@ -168,15 +163,14 @@ std::size_t VirtualUartBuffer::blocking_read(std::span<char> buf) noexcept {
     }();
     std::cout << "buf_cp: " << buf_cp << std::endl;
     buf_cp.wait(0);
-    std::size_t count = 0;
     if (!mut.try_lock()) {
         return 0;
     } else {
-        count = std::min(d.size(), buf.size());
+        const std::size_t count = std::min(d.size(), buf.size());
         std::copy_n(d.begin(), count, buf.begin());
         d.erase(d.begin(), d.begin() + count);
         if (count != 0 ) {
-            buf_cp.store(88);
+            buf_cp.store(d.size());
             buf_cp.notify_all();
         }
         mut.unlock();
@@ -213,7 +207,7 @@ std::size_t VirtualUartBuffer::blocking_write(std::span<const char> buf) noexcep
         std::copy_n(buf.begin(), count, std::back_inserter(d));
 
         if (count != 0 ) {
-             buf_cp.store(77);
+             buf_cp.store(d.size());
              buf_cp.notify_all();
         }
         std::cout << "buf_cp: " << buf_cp << std::endl;
