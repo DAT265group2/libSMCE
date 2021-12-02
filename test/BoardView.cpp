@@ -175,8 +175,8 @@ TEST_CASE("BoardView Blocking I/O", "[BoardView]"){
     std::array out = {'H', 'E', 'L', 'L', 'O', ' ', 'U', 'A', 'R', 'T', '\0'};
     std::array<char, out.size()> in{};
 
-    REQUIRE(uart0.tx().write(out) == out.size());
-    REQUIRE(uart0.rx().read(in) == in.size());
+    REQUIRE(uart0.rx().write(out) == out.size());
+    REQUIRE(uart0.tx().read(in) == in.size());
 
     /*std::thread task_read {[&]{
         REQUIRE(uart0.rx().read(in) == in.size());
