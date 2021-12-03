@@ -162,8 +162,9 @@ std::size_t VirtualUartBuffer::blocking_read(std::span<char> buf) noexcept {
         unreachable(); // GCOV_EXCL_LINE
     }();
 
-    std::cout << "blocking_read_before_lock: " << buf_cp << std::endl;
-    buf_cp.wait(0);
+    auto& buf_copy = chan.buffer_size_gb;
+    std::cout << "blocking_read_before_lock: " << buf_copy << std::endl;
+    buf_copy.wait(0);
 
     //TODO:The if-else block will be modified
     /*if (!mut.try_lock()) {
@@ -183,19 +184,19 @@ std::size_t VirtualUartBuffer::blocking_read(std::span<char> buf) noexcept {
         return count;
     }*/
 
-    std::cout << "read_buf_cp: " << buf_cp << std::endl;
-    std::cout << "read_fail_get_lock: " << buf_cp << std::endl;
+    std::cout << "read_buf_cp: " << buf_copy << std::endl;
+    std::cout << "read_fail_get_lock: " << buf_copy << std::endl;
     std::lock_guard lg{mut, std::adopt_lock};
     const std::size_t count = std::min(d.size(), buf.size());
     std::copy_n(d.begin(), count, buf.begin());
     d.erase(d.begin(), d.begin() + count);
     if (count != 0 ) {
-        buf_cp.store(d.size());
-        buf_cp.notify_all();
-        std::cout << "read_buf_cp != 0" << buf_cp << std::endl;
+        buf_copy.store(d.size());
+        buf_copy.notify_all();
+        std::cout << "read_buf_cp != 0" << buf_copy << std::endl;
     }
     std::cout << "blocking_read_end" << std::endl;
-    std::cout << "read_buf_cp: " << buf_cp << std::endl;
+    std::cout << "read_buf_cp: " << buf_copy << std::endl;
     return count;
 }
 
@@ -215,8 +216,9 @@ std::size_t VirtualUartBuffer::blocking_write(std::span<const char> buf) noexcep
         unreachable(); // GCOV_EXCL_LINE
     }();
 
-    std::cout << "write_buf_cp: " << buf_cp << std::endl;
-    buf_cp.wait(static_cast<std::size_t>(max_buffered));
+    auto& buf_copy = chan.buffer_size_gb;
+    std::cout << "write_buf_cp: " << buf_copy << std::endl;
+    buf_copy.wait(static_cast<std::size_t>(max_buffered));
 
     //TODO:The if-else block will be modified
     /*if (!mut.try_lock()) {
@@ -247,9 +249,9 @@ std::size_t VirtualUartBuffer::blocking_write(std::span<const char> buf) noexcep
     std::copy_n(buf.begin(), count, std::back_inserter(d));
 
     if (count != 0 ) {
-        buf_cp.store(d.size());
-        buf_cp.notify_all();
-        std::cout << "write_buf_cp != 0, buf_cp: " << buf_cp << std::endl;
+        buf_copy.store(d.size());
+        buf_copy.notify_all();
+        std::cout << "write_buf_cp != 0, buf_cp: " << buf_copy << std::endl;
     }
     std::cout << "blocking_write_end" << std::endl;
     return count;
