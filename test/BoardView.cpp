@@ -175,9 +175,14 @@ TEST_CASE("BoardView Blocking I/O", "[BoardView]"){
     std::array out = {'H', 'E', 'L', 'L', 'O', ' ', 'U', 'A', 'R', 'T', '\0'};
     std::array<char, out.size()> in{};
     REQUIRE(uart0.rx().blocking_write(out) == out.size());
-    REQUIRE(uart0.rx().size() == in.size());
-    REQUIRE(uart0.tx().size() == in.size());
-    REQUIRE(uart0.tx().read(in) == in.size());
+    int ticks = 16'000;
+    do {
+        if (ticks-- == 0)
+            FAIL("Timed out");
+        std::this_thread::sleep_for(1ms);
+    } while (uart0.tx().size() != in.size());
+    REQUIRE(uart0.tx().front() == 'H');
+    REQUIRE(uart0.tx().blocking_read(in) == in.size());
 
     /*std::thread task_read {[&]{
         REQUIRE(uart0.rx().read(in) == in.size());
