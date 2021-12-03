@@ -150,7 +150,7 @@ std::size_t VirtualUartBuffer::blocking_read(std::span<char> buf) noexcept {
     std::cout << "blocking_read_begin" << std::endl;
     if (!exists())
         return 0;
-
+    std::cout << "blocking_read_begin_exists" << std::endl;
     auto& chan = m_bdat->uart_channels[m_index];
     auto [d, mut, max_buffered, buf_cp] = [&] {
         switch (m_dir) {
@@ -203,6 +203,7 @@ std::size_t VirtualUartBuffer::blocking_write(std::span<const char> buf) noexcep
     std::cout << "blocking_write_begin" << std::endl;
     if (!exists())
         return 0;
+    std::cout << "blocking_write_begin_exists" << std::endl;
     auto& chan = m_bdat->uart_channels[m_index];
     auto [d, mut, max_buffered, buf_cp] = [&] {
         switch (m_dir) {
