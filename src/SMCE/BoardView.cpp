@@ -185,7 +185,7 @@ std::size_t VirtualUartBuffer::blocking_read(std::span<char> buf) noexcept {
 
     std::cout << "read_buf_cp: " << buf_cp << std::endl;
     std::cout << "read_fail_get_lock: " << buf_cp << std::endl;
-    std::lock_guard lg{mut};
+    std::lock_guard lg{mut, std::adopt_lock};
     const std::size_t count = std::min(d.size(), buf.size());
     std::copy_n(d.begin(), count, buf.begin());
     d.erase(d.begin(), d.begin() + count);
