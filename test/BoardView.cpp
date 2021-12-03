@@ -182,7 +182,7 @@ TEST_CASE("BoardView Blocking I/O", "[BoardView]"){
         std::this_thread::sleep_for(1ms);
     } while (uart0.tx().size() != in.size());
     REQUIRE(uart0.tx().front() == 'H');
-    REQUIRE(uart0.tx().blocking_read(in) == in.size());
+    uart0.tx().blocking_read(in);
 
     /*std::thread task_read {[&]{
         REQUIRE(uart0.rx().read(in) == in.size());
