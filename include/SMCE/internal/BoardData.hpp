@@ -124,7 +124,7 @@ struct SMCE_INTERNAL BoardData {
     struct SMCE_INTERNAL UartChannel {
         IpcAtomicValue<bool> active = false; // rw
         IpcAtomicValue<bool> read_ready = true; // rw
-        IpcAtomicValue<bool> write_ready = false; // rw
+        IpcAtomicValue<bool> write_ready = true; // rw
         IpcAtomicValue<std::size_t> buffer_size_gb = 0;
         IpcMovableMutex rx_mut;
         IpcMovableMutex tx_mut;
