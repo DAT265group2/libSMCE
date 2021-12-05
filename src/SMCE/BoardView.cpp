@@ -191,7 +191,6 @@ std::size_t VirtualUartBuffer::blocking_write(std::span<const char> buf) noexcep
     }();
 
     buf_copy.wait(static_cast<std::size_t>(max_buffered));
-
     std::lock_guard lg{mut}; //lock the mutex
     std::size_t count = 0;
     auto available_size = std::clamp(max_buffered - d.size(), std::size_t{0}, static_cast<std::size_t>(max_buffered));
