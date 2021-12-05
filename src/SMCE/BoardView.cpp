@@ -190,7 +190,9 @@ std::size_t VirtualUartBuffer::blocking_write(std::span<const char> buf) noexcep
         unreachable(); // GCOV_EXCL_LINE
     }();
 
+    std::cout << "before waiting, buf.size() is " << buf_copy << std::endl;
     buf_copy.wait(static_cast<std::size_t>(max_buffered));
+    std::cout << "after waiting, buf.size() is " << buf_copy << std::endl;
     std::lock_guard lg{mut}; //lock the mutex
     std::size_t count = 0;
     auto available_size = std::clamp(max_buffered - d.size(), std::size_t{0}, static_cast<std::size_t>(max_buffered));
@@ -198,13 +200,15 @@ std::size_t VirtualUartBuffer::blocking_write(std::span<const char> buf) noexcep
         count = buf.size();
         std::copy_n(buf.begin(), count, std::back_inserter(d));
         buf_copy.store(d.size());
-        std::cout << "available_size > buf.size(), buf.size() is " << buf_copy;
+        std::cout << "available_size > buf.size(), buf.size() is " << buf_copy << std::endl;
         buf_copy.notify_all();
     } else {
+        std::cout << "available_size < buf.size(), buf.size() is " << buf_copy << std::endl;
         count = buf.size() - available_size;
         std::copy_n(buf.begin(), count, std::back_inserter(d));
         buf_copy.store(d.size());
         buf_copy.notify_all();
+        std::cout << "after write, buf.size() is " << buf_copy << std::endl;
         return blocking_write(buf.subspan(available_size));
     }
 
