@@ -206,11 +206,11 @@ std::size_t VirtualUartBuffer::blocking_write(std::span<const char> buf) noexcep
         std::cout << "available_size > buf.size(), buf.size() is " << buf_copy << std::endl;
         buf_copy.notify_all();
     } else {
-        std::cout << "available_size < buf.size(), buf.size() is " << buf_copy << std::endl;
+        std::cout << "available_size < buf.size(), buf.size() is " << buf_copy << ", d.size() is "<< std::endl;
         std::copy_n(buf.begin(), available_size, std::back_inserter(d));
         buf_copy.store(d.size());
         buf_copy.notify_all();
-        std::cout << "after write, buf.size() is " << buf_copy << std::endl;
+        std::cout << "after write, buf.size() is " << buf_copy << ", d.size() is " << std::endl;
         return blocking_write(buf.subspan(available_size));
     }
 
