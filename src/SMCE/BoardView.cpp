@@ -205,9 +205,7 @@ std::size_t VirtualUartBuffer::blocking_write(std::span<const char> buf) noexcep
         std::copy_n(buf.begin(), count, std::back_inserter(d));
         buf_copy.store(d.size());
         buf_copy.notify_all();
-        std::vector<char> buf_new{};
-        std::copy_n((buf.begin()+available_size), count, std::back_inserter(buf_new));
-        return blocking_write(buf_new);
+        return blocking_write(buf.subspan(available_size));
     }
 
     return count;
