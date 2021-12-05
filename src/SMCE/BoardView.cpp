@@ -130,12 +130,12 @@ VirtualPin VirtualPins::operator[](std::size_t pin_id) noexcept {
     if (!exists())
         return 0;
     auto& chan = m_bdat->uart_channels[m_index];
-    auto [d, mut, s_b] = [&] {
+    auto [d, mut] = [&] {
         switch (m_dir) {
         case Direction::rx:
-            return std::tie(chan.rx, chan.rx_mut, chan.buffer_size_rx);
+            return std::tie(chan.rx, chan.rx_mut);
         case Direction::tx:
-            return std::tie(chan.tx, chan.tx_mut, chan.buffer_size_rx);
+            return std::tie(chan.tx, chan.tx_mut);
         }
         unreachable(); // GCOV_EXCL_LINE
     }();
