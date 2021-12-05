@@ -199,7 +199,7 @@ TEST_CASE("BoardView Blocking I/O", "[BoardView]"){
         //after writing
         int ticks1 = 16'000;
         do {
-            if (ticks-- == 0)
+            if (ticks1-- == 0)
                 FAIL("Timed out");
             std::this_thread::sleep_for(1ms);
         } while (uart0.tx().size() != in.size());
