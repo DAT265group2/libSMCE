@@ -220,7 +220,6 @@ TEST_CASE("BoardView Blocking I/O", "[BoardView]"){
             int ticks = 5'000;
             do {
                 if (ticks-- == 0) {
-                    REQUIRE(write_blocking);
                     isTesting.store(false);
                 }
                 std::this_thread::sleep_for(1ms);
