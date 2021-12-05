@@ -152,13 +152,7 @@ std::size_t VirtualUartBuffer::blocking_read(std::span<char> buf) noexcept {
     auto& chan = m_bdat->uart_channels[m_index];
     auto& buf_copy = chan.buffer_size_gb;
 
-    if (!chan.read_ready.load())
-        return 0;
-
-    if (buf_copy.load() == 0) {
-        chan.read_ready.store(false);
-        buf_copy.wait(0);
-    }
+    buf_copy.wait(0);
 
     auto [d, mut, max_buffered] = [&] {
         switch (m_dir) {
@@ -175,9 +169,7 @@ std::size_t VirtualUartBuffer::blocking_read(std::span<char> buf) noexcept {
     std::copy_n(d.begin(), count, buf.begin());
     d.erase(d.begin(), d.begin() + count);
     buf_copy.store(d.size());
-    buf_copy.notify_one();
-
-    chan.read_ready.store(true);
+    buf_copy.notify_all();
 
     return count;
 }
@@ -187,8 +179,6 @@ std::size_t VirtualUartBuffer::blocking_write(std::span<const char> buf) noexcep
         return 0;
     auto& chan = m_bdat->uart_channels[m_index];
     auto& buf_copy = chan.buffer_size_gb;
-    if (!chan.write_ready.load())
-        return 0;
 
     auto [d, mut, max_buffered] = [&] {
         switch (m_dir) {
@@ -200,20 +190,25 @@ std::size_t VirtualUartBuffer::blocking_write(std::span<const char> buf) noexcep
         unreachable(); // GCOV_EXCL_LINE
     }();
 
-    if (buf_copy.load() == static_cast<std::size_t>(max_buffered)) {
-        chan.write_ready.store(false);
-        buf_copy.wait(static_cast<std::size_t>(max_buffered));
-    }
+    buf_copy.wait(static_cast<std::size_t>(max_buffered));
 
     std::lock_guard lg{mut}; //lock the mutex
-    const std::size_t count = std::min(
-        std::clamp(max_buffered - d.size(), std::size_t{0}, static_cast<std::size_t>(max_buffered)), buf.size());
-    std::copy_n(buf.begin(), count, std::back_inserter(d));
-
-    buf_copy.store(d.size());
-    buf_copy.notify_one();
-
-    chan.write_ready.store(true);
+    std::size_t count = 0;
+    auto available_size = std::clamp(max_buffered - d.size(), std::size_t{0}, static_cast<std::size_t>(max_buffered));
+    if (available_size > buf.size()) {
+        count = buf.size();
+        std::copy_n(buf.begin(), count, std::back_inserter(d));
+        buf_copy.store(d.size());
+        buf_copy.notify_all();
+    } else {
+        count = buf.size() - available_size;
+        std::copy_n(buf.begin(), count, std::back_inserter(d));
+        buf_copy.store(d.size());
+        buf_copy.notify_all();
+        std::vector<char> buf_new{};
+        std::copy_n((buf.begin()+available_size), count, std::back_inserter(buf_new));
+        return blocking_write(buf_new);
+    }
 
     return count;
 }
