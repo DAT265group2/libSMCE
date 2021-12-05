@@ -176,20 +176,8 @@ TEST_CASE("BoardView Blocking I/O", "[BoardView]"){
     std::array<char, out.size()> in{};
 
     REQUIRE(uart0.tx().blocking_write(out) == out.size());
-    int ticks = 16'000;
-    do {
-        if (ticks-- == 0)
-            FAIL("Timed out");
-        std::this_thread::sleep_for(1ms);
-    } while (uart0.tx().size() != in.size());
-    REQUIRE(uart0.tx().front() == 'H');
-    REQUIRE(uart0.tx().blocking_read(in) == in.size());
-    REQUIRE(uart0.tx().front() == '\0');
-    REQUIRE(uart0.tx().size() == 0);
-    REQUIRE(in == out);
-    REQUIRE(in.front() == 'H');
 
-/*    //TODO: When buffer is empty, execute blocking_read() then expect it's blocked
+    //TODO: When buffer is empty, execute blocking_read() then expect it's blocked
     bool read_blocking = true;
     std::thread task_read {[&]{
         REQUIRE(uart0.rx().blocking_read(in) == in.size());
@@ -210,13 +198,14 @@ TEST_CASE("BoardView Blocking I/O", "[BoardView]"){
         REQUIRE(uart0.tx().blocking_write(out) == out.size());
 
         //after writing
+        int ticks1 = 16'000;
         do {
             if (ticks-- == 0)
                 FAIL("Timed out");
             std::this_thread::sleep_for(1ms);
         } while (uart0.tx().size() != in.size());
         REQUIRE_FALSE(read_blocking);
-    }};*/
+    }};
 
     //TODO: Continue execute blocking_write() that write an array which makes buffer is overload,
     // then thread of Read is unblocked
