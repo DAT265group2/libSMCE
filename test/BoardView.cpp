@@ -176,9 +176,9 @@ TEST_CASE("BoardView Blocking I/O", "[BoardView]"){
     std::array<char, out.size()> in{};
 
     //TODO: When buffer is empty, execute blocking_read() then expect it to be blocked
-    bool read_blocking = true;
+    std::atomic_bool read_blocking = true;
     std::thread task_read {[&]{
-        uart0.rx().blocking_read(in);
+        REQUIRE(uart0.rx().blocking_read(in) == in.size());
         read_blocking = false;
     }};
 
@@ -212,8 +212,7 @@ TEST_CASE("BoardView Blocking I/O", "[BoardView]"){
     //TODO: Execute blocking_read() wait for sketch copies array into buffer,
     // then thread of Write is unblocked
 
-
-    //REQUIRE(br.stop());
+    REQUIRE(br.stop());
 }
 
 constexpr auto div_ceil(std::size_t lhs, std::size_t rhs) { return lhs / rhs + !!(lhs % rhs); }
