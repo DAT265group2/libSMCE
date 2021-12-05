@@ -230,12 +230,12 @@ TEST_CASE("BoardView Blocking I/O", "[BoardView]"){
             uart0.rx().read(in);
             //REQUIRE(uart0.rx().read(in) == in.size());
             //REQUIRE(in[0] == 'H');
-            /*do {
+            do {
                 if (ticks-- == 0) {
                     FAIL("Timed out");
                 }
                 std::this_thread::sleep_for(1ms);
-            } while (write_blocking);*/
+            } while (write_blocking);
         }};
 
         task_write.join();
