@@ -237,6 +237,9 @@ TEST_CASE("BoardView Blocking I/O", "[BoardView]"){
                 std::this_thread::sleep_for(1ms);
             } while (write_blocking);
         }};
+
+        task_write.join();
+        task_test.join();
     }
 
     //TODO: Continue execute blocking_write() that write an array which makes buffer is overload,
