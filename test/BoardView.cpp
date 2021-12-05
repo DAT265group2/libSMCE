@@ -210,7 +210,7 @@ TEST_CASE("BoardView Blocking I/O", "[BoardView]"){
              'H', 'E', 'L', 'L', 'O', ' ', 'U', 'A', 'R', 'T', '3',
              'H', 'E', 'L', 'L', 'O', ' ', 'U', 'A', 'R', 'T', '4',
              'H', 'E', 'L', 'L', 'O', ' ', 'U', 'A', 'R', 'T', '5',
-             'H', 'E', 'L', 'L', 'O', ' ', 'U', 'A', 'R', 'T', '6'};
+             'H', 'E', 'L', 'L', 'O', ' ', 'U', 'A', 'R'};
         std::thread task_write {[&] {
             uart0.tx().blocking_write(out_large);
             write_blocking.store(false);
@@ -227,7 +227,7 @@ TEST_CASE("BoardView Blocking I/O", "[BoardView]"){
 
             std::array<char, 2> in{};
             ticks = 5'000;
-            uart0.tx().blocking_read(in);
+            uart0.rx().blocking_read(in);
             //REQUIRE(uart0.rx().read(in) == in.size());
             //REQUIRE(in[0] == 'H');
             do {
