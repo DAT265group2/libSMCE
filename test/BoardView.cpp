@@ -172,11 +172,10 @@ TEST_CASE("BoardView Blocking I/O", "[BoardView]"){
     REQUIRE_FALSE(uart1.tx().exists());
     std::this_thread::sleep_for(1ms);
 
-    std::array out = {'H', 'E', 'L', 'L', 'O', ' ', 'U', 'A', 'R', 'T', '\0'};
-    std::array<char, out.size()> in{};
-
     //TODO: When buffer is empty, execute blocking_read() then expect it to be blocked
-    SECTION("Test read thread is blocked"){
+/*    SECTION("Test read thread is blocked"){
+        std::array out = {'H', 'E', 'L', 'L', 'O', ' ', 'U', 'A', 'R', 'T', '\0'};
+        std::array<char, out.size()> in{};
         std::atomic_bool read_blocking = true;
         std::atomic_bool isTesting = true;
         std::thread task_read {[&]{
@@ -185,7 +184,7 @@ TEST_CASE("BoardView Blocking I/O", "[BoardView]"){
         }};
 
         std::thread task_test {[&] {
-            int ticks = 8'000;
+            int ticks = 5'000;
             do {
                 if (ticks-- == 0) {
                     REQUIRE(read_blocking);
@@ -198,11 +197,13 @@ TEST_CASE("BoardView Blocking I/O", "[BoardView]"){
 
         task_read.join();
         task_test.join();
-    }
+    }*/
 
     //TODO: Execute blocking_write(), wait for sketch copy array into buffer,
     // then thread is unblocked
-/*    SECTION("Test write thread is blocked") {
+    SECTION("Test write thread is blocked") {
+        std::atomic_bool write_blocking = true;
+        std::atomic_bool isTesting = true;
         std::array out_large =
             {'H', 'E', 'L', 'L', 'O', ' ', 'U', 'A', 'R', 'T', '1',
              'H', 'E', 'L', 'L', 'O', ' ', 'U', 'A', 'R', 'T', '2',
@@ -212,12 +213,31 @@ TEST_CASE("BoardView Blocking I/O", "[BoardView]"){
              'H', 'E', 'L', 'L', 'O', ' ', 'U', 'A', 'R', 'T', '6'};
         std::thread task_write {[&] {
             uart0.tx().blocking_write(out_large);
+            write_blocking.store(false);
         }};
 
-        std::thread task_read {[&] {
+        std::thread task_test {[&] {
+            int ticks = 5'000;
+            do {
+                if (ticks-- == 0) {
+                    REQUIRE(write_blocking);
+                    isTesting.store(false);
+                }
+                std::this_thread::sleep_for(1ms);
+            } while (write_blocking && isTesting);
 
+            std::array<char, 1> in{};
+            ticks = 5'000;
+            REQUIRE(uart0.rx().read(in) == in.size());
+            REQUIRE(in[0] == 'H');
+            do {
+                if (ticks-- == 0) {
+                    FAIL("Timed out");
+                }
+                std::this_thread::sleep_for(1ms);
+            } while (write_blocking);
         }};
-    }*/
+    }
 
     //TODO: Continue execute blocking_write() that write an array which makes buffer is overload,
     // then thread of Read is unblocked
