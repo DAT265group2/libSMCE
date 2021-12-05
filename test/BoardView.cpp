@@ -175,8 +175,6 @@ TEST_CASE("BoardView Blocking I/O", "[BoardView]"){
     std::array out = {'H', 'E', 'L', 'L', 'O', ' ', 'U', 'A', 'R', 'T', '\0'};
     std::array<char, out.size()> in{};
 
-    REQUIRE(uart0.rx().blocking_write(out) == out.size());
-
     //TODO: When buffer is empty, execute blocking_read() then expect it to be blocked
     SECTION("Test read thread is blocked"){
         std::atomic_bool read_blocking = true;
