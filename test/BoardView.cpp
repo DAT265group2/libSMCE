@@ -183,7 +183,6 @@ TEST_CASE("BoardView Blocking I/O", "[BoardView]"){
         uart0.rx().blocking_read(in);
         read_blocking = false;
     }};
-    task_read.join();
 
     //TODO: Execute blocking_write(), wait for sketch copy array into buffer,
     // then thread is unblocked
@@ -207,6 +206,8 @@ TEST_CASE("BoardView Blocking I/O", "[BoardView]"){
         REQUIRE_FALSE(read_blocking);
     }};
 
+    task_read.join();
+    task_write.join();
     //TODO: Continue execute blocking_write() that write an array which makes buffer is overload,
     // then thread of Read is unblocked
 
@@ -214,7 +215,7 @@ TEST_CASE("BoardView Blocking I/O", "[BoardView]"){
     // then thread of Write is unblocked
 
 
-    REQUIRE(br.stop());
+    //REQUIRE(br.stop());
 }
 
 constexpr auto div_ceil(std::size_t lhs, std::size_t rhs) { return lhs / rhs + !!(lhs % rhs); }
