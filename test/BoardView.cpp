@@ -178,19 +178,22 @@ TEST_CASE("BoardView Blocking I/O", "[BoardView]"){
     //TODO: When buffer is empty, execute blocking_read() then expect it to be blocked
     SECTION("Test read thread is blocked"){
         std::atomic_bool read_blocking = true;
+        std::atomic_bool isTesting = true;
         std::thread task_read {[&]{
             uart0.rx().blocking_read(in);
+            read_blocking.store(false);
         }};
 
         std::thread task_test {[&] {
             int ticks = 8'000;
             do {
-                if (ticks-- == 0)
+                if (ticks-- == 0) {
                     REQUIRE(read_blocking);
-                    read_blocking.store(false);
+                    isTesting.store(false);
+                }
                 std::this_thread::sleep_for(1ms);
-            } while (read_blocking);
-            uart0.tx().blocking_write(out);
+            } while (read_blocking && isTesting);
+            uart0.tx().blocking_write(out);  //for stopping blocked read thread
         }};
 
         task_read.join();
@@ -199,6 +202,22 @@ TEST_CASE("BoardView Blocking I/O", "[BoardView]"){
 
     //TODO: Execute blocking_write(), wait for sketch copy array into buffer,
     // then thread is unblocked
+/*    SECTION("Test write thread is blocked") {
+        std::array out_large =
+            {'H', 'E', 'L', 'L', 'O', ' ', 'U', 'A', 'R', 'T', '1',
+             'H', 'E', 'L', 'L', 'O', ' ', 'U', 'A', 'R', 'T', '2',
+             'H', 'E', 'L', 'L', 'O', ' ', 'U', 'A', 'R', 'T', '3',
+             'H', 'E', 'L', 'L', 'O', ' ', 'U', 'A', 'R', 'T', '4',
+             'H', 'E', 'L', 'L', 'O', ' ', 'U', 'A', 'R', 'T', '5',
+             'H', 'E', 'L', 'L', 'O', ' ', 'U', 'A', 'R', 'T', '6'};
+        std::thread task_write {[&] {
+            uart0.tx().blocking_write(out_large);
+        }};
+
+        std::thread task_read {[&] {
+
+        }};
+    }*/
 
     //TODO: Continue execute blocking_write() that write an array which makes buffer is overload,
     // then thread of Read is unblocked
