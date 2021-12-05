@@ -166,8 +166,11 @@ std::size_t VirtualUartBuffer::blocking_read(std::span<char> buf) noexcept {
 
     std::lock_guard lg{mut}; //lock the mutex
     const std::size_t count = std::min(d.size(), buf.size());
+    std::cout << "[read]before copy_n, buf size is " << buf_copy << " buf.size() is" << buf.size() << std::endl;
     std::copy_n(d.begin(), count, buf.begin());
+    std::cout << "[read]after copy_n, buf.size is " << buf_copy << " buf.size() is" << buf.size() << " d.size() is" << d.size() << std::endl;
     d.erase(d.begin(), d.begin() + count);
+    std::cout << "[read]after erase, buf.size is " << buf_copy << " d.size() is" << d.size() << std::endl;
     buf_copy.store(d.size());
     buf_copy.notify_all();
 
@@ -190,7 +193,7 @@ std::size_t VirtualUartBuffer::blocking_write(std::span<const char> buf) noexcep
         unreachable(); // GCOV_EXCL_LINE
     }();
 
-    std::cout << "before waiting, buf.size() is " << buf_copy << std::endl;
+
     buf_copy.wait(static_cast<std::size_t>(max_buffered));
     std::cout << "after waiting, buf.size() is " << buf_copy << std::endl;
     std::lock_guard lg{mut}; //lock the mutex
