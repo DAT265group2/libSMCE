@@ -227,7 +227,7 @@ TEST_CASE("BoardView Blocking I/O", "[BoardView]"){
 
             std::array<char, 2> in{};
             ticks = 5'000;
-            uart0.rx().read(in);
+            uart0.rx().blocking_read(in);
             //REQUIRE(uart0.rx().read(in) == in.size());
             //REQUIRE(in[0] == 'H');
             do {
