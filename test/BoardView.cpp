@@ -179,8 +179,8 @@ TEST_CASE("BoardView Blocking I/O", "[BoardView]"){
     SECTION("Test read thread is blocked"){
         std::atomic_bool read_blocking = true;
         std::thread task_read {[&]{
-            REQUIRE(uart0.rx().blocking_read(in) == in.size());
-            read_blocking = false;
+            uart0.rx().blocking_read(in);
+            read_blocking.store(false);
         }};
 
         std::thread task_test {[&] {
@@ -190,37 +190,16 @@ TEST_CASE("BoardView Blocking I/O", "[BoardView]"){
                     REQUIRE(read_blocking);
                 std::this_thread::sleep_for(1ms);
             } while (read_blocking);
-            uart0.rx().blocking_write(out);
+            uart0.tx().blocking_write(out);
         }};
 
         task_read.join();
         task_test.join();
     }
 
-
     //TODO: Execute blocking_write(), wait for sketch copy array into buffer,
     // then thread is unblocked
-/*    std::thread task_write {[&]{
-        //before writing
-        int ticks = 5'000;
-        do {
-            if (ticks-- == 0)
-                REQUIRE(read_blocking);
-            std::this_thread::sleep_for(1ms);
-        } while (read_blocking);
-        REQUIRE(uart0.tx().blocking_write(out) == out.size());
 
-        //after writing
-        int ticks1 = 16'000;
-        do {
-            if (ticks1-- == 0)
-                FAIL("Timed out");
-            std::this_thread::sleep_for(1ms);
-        } while (uart0.rx().size() != in.size());
-        REQUIRE_FALSE(read_blocking);
-    }};
-
-    task_write.join();*/
     //TODO: Continue execute blocking_write() that write an array which makes buffer is overload,
     // then thread of Read is unblocked
 
