@@ -198,6 +198,7 @@ std::size_t VirtualUartBuffer::blocking_write(std::span<const char> buf) noexcep
         count = buf.size();
         std::copy_n(buf.begin(), count, std::back_inserter(d));
         buf_copy.store(d.size());
+        std::cout << "available_size > buf.size(), buf.size() is " << buf_copy;
         buf_copy.notify_all();
     } else {
         count = buf.size() - available_size;
