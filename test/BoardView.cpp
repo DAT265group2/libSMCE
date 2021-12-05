@@ -180,7 +180,7 @@ TEST_CASE("BoardView Blocking I/O", "[BoardView]"){
     //TODO: When buffer is empty, execute blocking_read() then expect it's blocked
     bool read_blocking = true;
     std::thread task_read {[&]{
-        REQUIRE(uart0.rx().blocking_read(in) == in.size());
+        uart0.rx().blocking_read(in);
         read_blocking = false;
     }};
     task_read.join();
