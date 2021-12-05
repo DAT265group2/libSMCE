@@ -175,9 +175,7 @@ TEST_CASE("BoardView Blocking I/O", "[BoardView]"){
     std::array out = {'H', 'E', 'L', 'L', 'O', ' ', 'U', 'A', 'R', 'T', '\0'};
     std::array<char, out.size()> in{};
 
-    REQUIRE(uart0.tx().blocking_write(out) == out.size());
-
-    //TODO: When buffer is empty, execute blocking_read() then expect it's blocked
+    //TODO: When buffer is empty, execute blocking_read() then expect it to be blocked
     bool read_blocking = true;
     std::thread task_read {[&]{
         uart0.rx().blocking_read(in);
@@ -202,7 +200,7 @@ TEST_CASE("BoardView Blocking I/O", "[BoardView]"){
             if (ticks1-- == 0)
                 FAIL("Timed out");
             std::this_thread::sleep_for(1ms);
-        } while (uart0.tx().size() != in.size());
+        } while (uart0.rx().size() != in.size());
         REQUIRE_FALSE(read_blocking);
     }};
 
