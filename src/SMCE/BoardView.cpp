@@ -180,6 +180,7 @@ std::size_t VirtualUartBuffer::blocking_read(std::span<char> buf) noexcept {
 std::size_t VirtualUartBuffer::blocking_write(std::span<const char> buf) noexcept {
     if (!exists())
         return 0;
+    std::cout << "buf.size() is " << buf.size() << std::endl;
     auto& chan = m_bdat->uart_channels[m_index];
     auto& buf_copy = chan.buffer_size_gb;
 
@@ -201,13 +202,13 @@ std::size_t VirtualUartBuffer::blocking_write(std::span<const char> buf) noexcep
     auto available_size = std::clamp(max_buffered - d.size(), std::size_t{0}, static_cast<std::size_t>(max_buffered));
     std::cout << "[write]available_size is " << available_size << std::endl;
     if (available_size >= buf.size()) {
+        std::cout << "[write]available_size >= buf.size(), buf_cp is " << buf_copy << std::endl;
         count = buf.size();
         std::copy_n(buf.begin(), count, std::back_inserter(d));
         buf_copy.store(d.size());
-        std::cout << "[write]available_size >= buf.size(), buf_cp is " << buf_copy << std::endl;
         buf_copy.notify_all();
     } else {
-        std::cout << "[write]available_size < buf_cp is " << buf_copy << ", d.size() is " << d.size() << std::endl;
+        std::cout << "[write]available_size < buf.size(), buf_cp is " << buf_copy << ", d.size() is " << d.size() << std::endl;
         std::copy_n(buf.begin(), available_size, std::back_inserter(d));
         buf_copy.store(d.size());
         buf_copy.notify_all();
