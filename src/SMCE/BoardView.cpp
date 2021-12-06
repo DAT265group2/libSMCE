@@ -193,10 +193,10 @@ std::size_t VirtualUartBuffer::blocking_write(std::span<const char> buf) noexcep
         unreachable(); // GCOV_EXCL_LINE
     }();
 
-    std::cout << "[write]before waiting, buf.size() is " << buf_copy << ", d.size() is " << d.size() << std::endl;
+    std::cout << "[write]before waiting, buf_cp is " << buf_copy << ", d.size() is " << d.size() << std::endl;
     buf_copy.wait(static_cast<std::size_t>(max_buffered));
-    std::cout << "[write]after waiting, buf.size() is " << buf_copy  << ", d.size() is " << d.size() << std::endl;
-    std::lock_guard lg{mut}; //lock the mutex
+    std::cout << "[write]after waiting, buf_cp is " << buf_copy  << ", d.size() is " << d.size() << std::endl;
+    std::unique_lock<IpcMovableMutex> lock(mut);
     std::size_t count = 0;
     auto available_size = std::clamp(max_buffered - d.size(), std::size_t{0}, static_cast<std::size_t>(max_buffered));
     std::cout << "[write]available_size is " << available_size << std::endl;
@@ -204,14 +204,15 @@ std::size_t VirtualUartBuffer::blocking_write(std::span<const char> buf) noexcep
         count = buf.size();
         std::copy_n(buf.begin(), count, std::back_inserter(d));
         buf_copy.store(d.size());
-        std::cout << "[write]available_size >= buf.size() is " << buf_copy << std::endl;
+        std::cout << "[write]available_size >= buf.size(), buf_cp is " << buf_copy << std::endl;
         buf_copy.notify_all();
     } else {
-        std::cout << "[write]available_size < buf.size() is " << buf_copy << ", d.size() is " << d.size() << std::endl;
+        std::cout << "[write]available_size < buf_cp is " << buf_copy << ", d.size() is " << d.size() << std::endl;
         std::copy_n(buf.begin(), available_size, std::back_inserter(d));
         buf_copy.store(d.size());
         buf_copy.notify_all();
-        std::cout << "[write]after write, buf.size() is " << buf_copy << ", d.size() is " << d.size() << std::endl;
+        std::cout << "[write]after write, buf_cp is " << buf_copy << ", d.size() is " << d.size() << std::endl;
+        lock.unlock();
         return blocking_write(buf.subspan(available_size));
     }
 
