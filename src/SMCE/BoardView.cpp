@@ -170,7 +170,7 @@ std::size_t VirtualUartBuffer::blocking_read(std::span<char> buf) noexcept {
     return count;
 }
 
-std::size_t VirtualUartBuffer::blocking_write(std::span<const char> buf, std::size_t count) noexcept {
+std::size_t VirtualUartBuffer::blocking_write(std::span<const char> buf, std::size_t count = 0) noexcept {
     if (!exists())
         return 0;
     auto& chan = m_bdat->uart_channels[m_index];
@@ -199,9 +199,8 @@ std::size_t VirtualUartBuffer::blocking_write(std::span<const char> buf, std::si
         buf_copy.store(d.size());
         buf_copy.notify_all();
         lock.unlock();
-        return blocking_write(buf.subspan(available_size),count);
+        return count + blocking_write(buf.subspan(available_size));
     }
-
     return count;
 }
 
