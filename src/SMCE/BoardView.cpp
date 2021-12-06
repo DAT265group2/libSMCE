@@ -166,7 +166,7 @@ std::size_t VirtualUartBuffer::blocking_read(std::span<char> buf) noexcept {
     std::copy_n(d.begin(), count, buf.begin());
     d.erase(d.begin(), d.begin() + count);
     buf_copy.store(d.size());
-    buf_copy.notify_all();
+    buf_copy.notify_one();
     return count;
 }
 
@@ -189,15 +189,15 @@ std::size_t VirtualUartBuffer::blocking_write(std::span<const char> buf, std::si
     std::unique_lock<IpcMovableMutex> lock(mut);
     auto available_size = std::clamp(max_buffered - d.size(), std::size_t{0}, static_cast<std::size_t>(max_buffered));
     if (available_size >= buf.size()) {
-        count = count + buf.size();
+        count += buf.size();
         std::copy_n(buf.begin(), buf.size(), std::back_inserter(d));
         buf_copy.store(d.size());
-        buf_copy.notify_all();
+        buf_copy.notify_one();
     } else {
-        count = count + available_size;
+        count += available_size;
         std::copy_n(buf.begin(), available_size, std::back_inserter(d));
         buf_copy.store(d.size());
-        buf_copy.notify_all();
+        buf_copy.notify_one();
         lock.unlock();
         return count + blocking_write(buf.subspan(available_size));
     }
