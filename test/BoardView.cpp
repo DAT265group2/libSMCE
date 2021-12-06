@@ -179,12 +179,12 @@ TEST_CASE("BoardView Blocking I/O", "[BoardView]"){
         std::atomic_bool read_blocking = true;
         std::atomic_bool isTesting = true;
         std::thread task_read {[&]{
-            uart0.rx().blocking_read(in);
+            uart0.tx().blocking_read(in);
             read_blocking.store(false);
         }};
 
         std::thread task_test {[&] {
-            int ticks = 5'000;
+            int ticks = 3'000;
             do {
                 if (ticks-- == 0) {
                     REQUIRE(read_blocking);
@@ -192,7 +192,7 @@ TEST_CASE("BoardView Blocking I/O", "[BoardView]"){
                 }
                 std::this_thread::sleep_for(1ms);
             } while (read_blocking && isTesting);
-            uart0.tx().blocking_write(out);  //for stopping blocked read thread
+            uart0.rx().blocking_write(out);  //for stopping blocked read thread
         }};
 
         task_read.join();
