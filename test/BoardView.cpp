@@ -212,7 +212,7 @@ TEST_CASE("BoardView Blocking I/O", "[BoardView]"){
              'H', 'E', 'L', 'L', 'O', ' ', 'U', 'A', 'R', 'T', '5',
              'H', 'E', 'L', 'L', 'O', ' ', 'U', 'A', 'R','T', '6'};
         std::thread task_write {[&] {
-            uart0.rx().blocking_write(out_large);
+            REQUIRE(uart0.rx().blocking_write(out_large) == out_large.size());
             write_blocking.store(false);
         }};
 
@@ -228,16 +228,15 @@ TEST_CASE("BoardView Blocking I/O", "[BoardView]"){
 
             std::array<char, 2> in{};
             ticks = 3'000;
-            uart0.tx().blocking_read(in);
-//            REQUIRE(uart0.tx().blocking_read(in) == in.size());
-//            REQUIRE(in.front() == 'H');
+            REQUIRE(uart0.tx().blocking_read(in) == in.size());
+            REQUIRE(in.front() == 'H');
             do {
                 if (ticks-- == 0) {
                     FAIL("Timed out");
                 }
                 std::this_thread::sleep_for(1ms);
             } while (write_blocking);
-//            REQUIRE_FALSE(write_blocking);
+            REQUIRE_FALSE(write_blocking);
         }};
         task_write.join();
         task_test.join();
