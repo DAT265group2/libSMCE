@@ -194,11 +194,12 @@ std::size_t VirtualUartBuffer::blocking_write(std::span<const char> buf, std::si
         buf_copy.store(d.size());
         buf_copy.notify_all();
     } else {
+        count = count + available_size;
         std::copy_n(buf.begin(), available_size, std::back_inserter(d));
         buf_copy.store(d.size());
         buf_copy.notify_all();
         lock.unlock();
-        return blocking_write(buf.subspan(available_size),available_size);
+        return blocking_write(buf.subspan(available_size),count);
     }
 
     return count;
