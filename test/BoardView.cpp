@@ -212,12 +212,13 @@ TEST_CASE("BoardView Blocking I/O", "[BoardView]"){
              'H', 'E', 'L', 'L', 'O', ' ', 'U', 'A', 'R', 'T', '5',
              'H', 'E', 'L', 'L', 'O', ' ', 'U', 'A', 'R','T', '6'};
         std::thread task_write {[&] {
-            uart0.rx().blocking_write(out_large);
+            REQUIRE(uart0.rx().blocking_write(out_large) == out_large.size());
+            REQUIRE(uart0.tx().front() == 'L');
             write_blocking.store(false);
         }};
 
         std::thread task_test {[&] {
-            int ticks = 5'000;
+            int ticks = 3'000;
             do {
                 if (ticks-- == 0) {
                     REQUIRE(write_blocking);
@@ -226,28 +227,22 @@ TEST_CASE("BoardView Blocking I/O", "[BoardView]"){
                 std::this_thread::sleep_for(1ms);
             } while (write_blocking && isTesting);
 
-            std::this_thread::sleep_for(3s);
-
             std::array<char, 2> in{};
-            ticks = 5'000;
-            uart0.tx().blocking_read(in);
+            ticks = 3'000;
+            REQUIRE(uart0.tx().blocking_read(in) == in.size());
+            REQUIRE(in.front() == 'H');
             do {
                 if (ticks-- == 0) {
                     FAIL("Timed out");
                 }
                 std::this_thread::sleep_for(1ms);
             } while (write_blocking);
+            REQUIRE_FALSE(write_blocking);
         }};
 
         task_write.join();
         task_test.join();
     }
-
-    //TODO: Continue execute blocking_write() that write an array which makes buffer is overload,
-    // then thread of Read is unblocked
-
-    //TODO: Execute blocking_read() wait for sketch copies array into buffer,
-    // then thread of Write is unblocked
 
     REQUIRE(br.stop());
 }

@@ -177,7 +177,7 @@ std::size_t VirtualUartBuffer::blocking_read(std::span<char> buf) noexcept {
     return count;
 }
 
-std::size_t VirtualUartBuffer::blocking_write(std::span<const char> buf) noexcept {
+std::size_t VirtualUartBuffer::blocking_write(std::span<const char> buf, std::size_t count) noexcept {
     if (!exists())
         return 0;
     std::cout << "buf.size() is " << buf.size() << std::endl;
@@ -198,12 +198,11 @@ std::size_t VirtualUartBuffer::blocking_write(std::span<const char> buf) noexcep
     buf_copy.wait(static_cast<std::size_t>(max_buffered));
     std::cout << "[write]after waiting, buf_cp is " << buf_copy  << ", d.size() is " << d.size() << std::endl;
     std::unique_lock<IpcMovableMutex> lock(mut);
-    std::size_t count = 0;
     auto available_size = std::clamp(max_buffered - d.size(), std::size_t{0}, static_cast<std::size_t>(max_buffered));
     std::cout << "[write]available_size is " << available_size << std::endl;
     if (available_size >= buf.size()) {
         std::cout << "[write]available_size >= buf.size(), buf_cp is " << buf_copy << std::endl;
-        count = buf.size();
+        count = count + buf.size();
         std::copy_n(buf.begin(), count, std::back_inserter(d));
         buf_copy.store(d.size());
         buf_copy.notify_all();
@@ -214,7 +213,7 @@ std::size_t VirtualUartBuffer::blocking_write(std::span<const char> buf) noexcep
         buf_copy.notify_all();
         std::cout << "[write]after write, buf_cp is " << buf_copy << ", d.size() is " << d.size() << std::endl;
         lock.unlock();
-        return blocking_write(buf.subspan(available_size));
+        return blocking_write(buf.subspan(available_size),available_size);
     }
 
     return count;

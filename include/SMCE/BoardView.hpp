@@ -141,7 +141,7 @@ class SMCE_API VirtualUartBuffer {
     std::size_t read(std::span<char>) noexcept;
     std::size_t write(std::span<const char>) noexcept;
     std::size_t blocking_read(std::span<char>) noexcept;
-    std::size_t blocking_write(std::span<const char>) noexcept;
+    std::size_t blocking_write(std::span<const char>, std::size_t count = 0) noexcept;
     [[nodiscard]] char front() noexcept;
 };
 
