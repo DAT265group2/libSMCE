@@ -190,7 +190,7 @@ std::size_t VirtualUartBuffer::blocking_write(std::span<const char> buf, std::si
     auto available_size = std::clamp(max_buffered - d.size(), std::size_t{0}, static_cast<std::size_t>(max_buffered));
     if (available_size >= buf.size()) {
         count = count + buf.size();
-        std::copy_n(buf.begin(), count, std::back_inserter(d));
+        std::copy_n(buf.begin(), buf.size(), std::back_inserter(d));
         buf_copy.store(d.size());
         buf_copy.notify_all();
     } else {
