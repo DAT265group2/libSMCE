@@ -151,9 +151,6 @@ std::size_t VirtualUartBuffer::blocking_read(std::span<char> buf) noexcept {
         return 0;
     auto& chan = m_bdat->uart_channels[m_index];
     auto& buf_copy = chan.buffer_size_gb;
-
-    buf_copy.wait(0);
-
     auto [d, mut, max_buffered] = [&] {
         switch (m_dir) {
         case Direction::rx:
@@ -163,24 +160,19 @@ std::size_t VirtualUartBuffer::blocking_read(std::span<char> buf) noexcept {
         }
         unreachable(); // GCOV_EXCL_LINE
     }();
-
+    buf_copy.wait(0);
     std::lock_guard lg{mut}; //lock the mutex
     const std::size_t count = std::min(d.size(), buf.size());
-    std::cout << "[read]before copy_n, buf_cp size is " << buf_copy << ", buf.size() is " << buf.size() << ", d.size() is " << d.size() << std::endl;
     std::copy_n(d.begin(), count, buf.begin());
-    std::cout << "[read]after copy_n, buf_cp is " << buf_copy << ", buf.size() is " << buf.size() << ", d.size() is " << d.size() << std::endl;
     d.erase(d.begin(), d.begin() + count);
-    std::cout << "[read]after erase, buf_cp is " << buf_copy << ", buf.size() is " << buf.size() << ", d.size() is " << d.size() << std::endl;
     buf_copy.store(d.size());
     buf_copy.notify_all();
-
     return count;
 }
 
 std::size_t VirtualUartBuffer::blocking_write(std::span<const char> buf, std::size_t count) noexcept {
     if (!exists())
         return 0;
-    std::cout << "buf.size() is " << buf.size() << std::endl;
     auto& chan = m_bdat->uart_channels[m_index];
     auto& buf_copy = chan.buffer_size_gb;
 
@@ -193,25 +185,18 @@ std::size_t VirtualUartBuffer::blocking_write(std::span<const char> buf, std::si
         }
         unreachable(); // GCOV_EXCL_LINE
     }();
-
-    std::cout << "[write]before waiting, buf_cp is " << buf_copy << ", d.size() is " << d.size() << std::endl;
     buf_copy.wait(static_cast<std::size_t>(max_buffered));
-    std::cout << "[write]after waiting, buf_cp is " << buf_copy  << ", d.size() is " << d.size() << std::endl;
     std::unique_lock<IpcMovableMutex> lock(mut);
     auto available_size = std::clamp(max_buffered - d.size(), std::size_t{0}, static_cast<std::size_t>(max_buffered));
-    std::cout << "[write]available_size is " << available_size << std::endl;
     if (available_size >= buf.size()) {
-        std::cout << "[write]available_size >= buf.size(), buf_cp is " << buf_copy << std::endl;
         count = count + buf.size();
         std::copy_n(buf.begin(), count, std::back_inserter(d));
         buf_copy.store(d.size());
         buf_copy.notify_all();
     } else {
-        std::cout << "[write]available_size < buf.size(), buf_cp is " << buf_copy << ", d.size() is " << d.size() << std::endl;
         std::copy_n(buf.begin(), available_size, std::back_inserter(d));
         buf_copy.store(d.size());
         buf_copy.notify_all();
-        std::cout << "[write]after write, buf_cp is " << buf_copy << ", d.size() is " << d.size() << std::endl;
         lock.unlock();
         return blocking_write(buf.subspan(available_size),available_size);
     }

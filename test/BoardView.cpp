@@ -173,7 +173,7 @@ TEST_CASE("BoardView Blocking I/O", "[BoardView]"){
     std::this_thread::sleep_for(1ms);
 
     //TODO: When buffer is empty, execute blocking_read() then expect it to be blocked.
-/*    SECTION("Test read thread is blocked"){
+    SECTION("Test read thread is blocked"){
         std::array out = {'H', 'E', 'L', 'L', 'O', ' ', 'U', 'A', 'R', 'T', '\0'};
         std::array<char, out.size()> in{};
         std::atomic_bool read_blocking = true;
@@ -197,10 +197,10 @@ TEST_CASE("BoardView Blocking I/O", "[BoardView]"){
 
         task_read.join();
         task_test.join();
-    }*/
+    }
 
-    //TODO: Execute blocking_write(), wait for sketch copy array into buffer,
-    // then thread is unblocked
+    //TODO: Execute blocking_write() that write bytes which exceeds the size of the buffer,
+    // then blocked until after executing blocking_read() so that can continue to write remaining bytes
     SECTION("Test write thread is blocked") {
         std::atomic_bool write_blocking = true;
         std::atomic_bool isTesting = true;
@@ -239,7 +239,6 @@ TEST_CASE("BoardView Blocking I/O", "[BoardView]"){
             } while (write_blocking);
             REQUIRE_FALSE(write_blocking);
         }};
-
         task_write.join();
         task_test.join();
     }
