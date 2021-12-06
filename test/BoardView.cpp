@@ -225,6 +225,13 @@ TEST_CASE("BoardView Blocking I/O", "[BoardView]"){
                 std::this_thread::sleep_for(1ms);
             } while (write_blocking && isTesting);
 
+            ticks = 16'000;
+            do {
+                if (ticks-- == 0)
+                    FAIL("Timed out");
+                std::this_thread::sleep_for(1ms);
+            } while (uart0.tx().size() != 64);
+
             std::array<char, 2> in{};
             ticks = 5'000;
             uart0.rx().blocking_read(in);

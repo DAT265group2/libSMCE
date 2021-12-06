@@ -166,11 +166,11 @@ std::size_t VirtualUartBuffer::blocking_read(std::span<char> buf) noexcept {
 
     std::lock_guard lg{mut}; //lock the mutex
     const std::size_t count = std::min(d.size(), buf.size());
-    std::cout << "[read]before copy_n, buf size is " << buf_copy << ", buf.size() is " << buf.size() << ", d.size() is " << d.size() << std::endl;
+    std::cout << "[read]before copy_n, buf_cp size is " << buf_copy << ", buf.size() is " << buf.size() << ", d.size() is " << d.size() << std::endl;
     std::copy_n(d.begin(), count, buf.begin());
-    std::cout << "[read]after copy_n, buf size is " << buf_copy << ", buf.size() is " << buf.size() << ", d.size() is " << d.size() << std::endl;
+    std::cout << "[read]after copy_n, buf_cp is " << buf_copy << ", buf.size() is " << buf.size() << ", d.size() is " << d.size() << std::endl;
     d.erase(d.begin(), d.begin() + count);
-    std::cout << "[read]after erase, buf size is " << buf_copy << ", d.size() is " << d.size() << std::endl;
+    std::cout << "[read]after erase, buf_cp is " << buf_copy << ", buf.size() is " << buf.size() << ", d.size() is " << d.size() << std::endl;
     buf_copy.store(d.size());
     buf_copy.notify_all();
 
@@ -193,20 +193,21 @@ std::size_t VirtualUartBuffer::blocking_write(std::span<const char> buf) noexcep
         unreachable(); // GCOV_EXCL_LINE
     }();
 
-
+    std::cout << "[write]before waiting, buf.size() is " << buf_copy << ", d.size() is " << d.size() << std::endl;
     buf_copy.wait(static_cast<std::size_t>(max_buffered));
-    std::cout << "[write]after waiting, buf.size() is " << buf_copy << std::endl;
+    std::cout << "[write]after waiting, buf.size() is " << buf_copy  << ", d.size() is " << d.size() << std::endl;
     std::lock_guard lg{mut}; //lock the mutex
     std::size_t count = 0;
     auto available_size = std::clamp(max_buffered - d.size(), std::size_t{0}, static_cast<std::size_t>(max_buffered));
-    if (available_size > buf.size()) {
+    std::cout << "[write]available_size is " << available_size << std::endl;
+    if (available_size >= buf.size()) {
         count = buf.size();
         std::copy_n(buf.begin(), count, std::back_inserter(d));
         buf_copy.store(d.size());
-        std::cout << "[write]available_size > buf.size(), buf.size() is " << buf_copy << std::endl;
+        std::cout << "[write]available_size >= buf.size() is " << buf_copy << std::endl;
         buf_copy.notify_all();
     } else {
-        std::cout << "[write]available_size < buf.size(), buf.size() is " << buf_copy << ", d.size() is " << d.size() << std::endl;
+        std::cout << "[write]available_size < buf.size() is " << buf_copy << ", d.size() is " << d.size() << std::endl;
         std::copy_n(buf.begin(), available_size, std::back_inserter(d));
         buf_copy.store(d.size());
         buf_copy.notify_all();
