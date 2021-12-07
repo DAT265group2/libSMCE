@@ -259,13 +259,14 @@ TEST_CASE("BoardView Blocking I/O", "[BoardView]"){
             REQUIRE(uart0.rx().write(out) == out.size());
         }};
 
-        /*std::thread task_write2 {[&]{
+        std::thread task_write1 {[&]{
             std::this_thread::sleep_for(5s);
             REQUIRE(uart0.rx().write(out) == out.size());
-        }};*/
+        }};
         task_read0.join();
         task_read1.join();
         task_write0.join();
+        task_write1.join();
     }
 
     REQUIRE(br.stop());
