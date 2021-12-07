@@ -172,10 +172,11 @@ TEST_CASE("BoardView Blocking I/O", "[BoardView]"){
     REQUIRE_FALSE(uart1.tx().exists());
     std::this_thread::sleep_for(1ms);
 
+    std::array out = {'H', 'E', 'L', 'L', 'O', ' ', 'U', 'A', 'R', 'T', '\0'};
+    std::array<char, out.size()> in{};
+
     //TODO: When buffer is empty, execute blocking_read() then expect it to be blocked.
     SECTION("Test read thread is blocked"){
-        std::array out = {'H', 'E', 'L', 'L', 'O', ' ', 'U', 'A', 'R', 'T', '\0'};
-        std::array<char, out.size()> in{};
         std::atomic_bool read_blocking = true;
         std::atomic_bool isTesting = true;
         std::thread task_read {[&]{
@@ -240,6 +241,31 @@ TEST_CASE("BoardView Blocking I/O", "[BoardView]"){
         }};
         task_write.join();
         task_test.join();
+    }
+
+    SECTION("Test multithread blocking_read and unblock sequentially") {
+        std::array<char, 2> in1 {};
+        std::array<char, 3> in2 {};
+        std::thread task_read0 {[&]{
+            REQUIRE(uart0.tx().blocking_read(in1) != 0);
+        }};
+        std::thread task_read1 {[&]{
+            std::this_thread::sleep_for(1s);
+            REQUIRE(uart0.tx().blocking_read(in2) != 0);
+        }};
+
+        std::thread task_write0 {[&]{
+            std::this_thread::sleep_for(2s);
+            REQUIRE(uart0.rx().write(out) == out.size());
+        }};
+
+        /*std::thread task_write2 {[&]{
+            std::this_thread::sleep_for(5s);
+            REQUIRE(uart0.rx().write(out) == out.size());
+        }};*/
+        task_read0.join();
+        task_read1.join();
+        task_write0.join();
     }
 
     REQUIRE(br.stop());

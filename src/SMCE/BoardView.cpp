@@ -245,6 +245,9 @@ std::size_t VirtualUartBuffer::write(std::span<const char> buf) noexcept {
     const std::size_t count = std::min(
         std::clamp(max_buffered - d.size(), std::size_t{0}, static_cast<std::size_t>(max_buffered)), buf.size());
     std::copy_n(buf.begin(), count, std::back_inserter(d));
+    auto& buf_copy = chan.buffer_size_gb;
+    buf_copy.store(d.size());
+    buf_copy.notify_one();
     return count;
 }
 
