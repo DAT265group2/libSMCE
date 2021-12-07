@@ -244,14 +244,14 @@ TEST_CASE("BoardView Blocking I/O", "[BoardView]"){
     }
 
     SECTION("Test multithread blocking_read and unblock sequentially") {
-        std::array<char, 2> in1 {};
-        std::array<char, 3> in2 {};
+        std::array<char, 2> in0 {};
+        std::array<char, 3> in1 {};
         std::thread task_read0 {[&]{
-            REQUIRE(uart0.tx().blocking_read(in1) != 0);
+            REQUIRE(uart0.tx().blocking_read(in0) != 0);
         }};
         std::thread task_read1 {[&]{
             std::this_thread::sleep_for(1s);
-            REQUIRE(uart0.tx().blocking_read(in2) != 0);
+            REQUIRE(uart0.tx().blocking_read(in1) != 0);
         }};
 
         std::thread task_write0 {[&]{

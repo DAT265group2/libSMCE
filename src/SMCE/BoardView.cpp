@@ -165,8 +165,11 @@ std::size_t VirtualUartBuffer::blocking_read(std::span<char> buf) noexcept {
     const std::size_t count = std::min(d.size(), buf.size());
     std::copy_n(d.begin(), count, buf.begin());
     d.erase(d.begin(), d.begin() + count);
+    if (buf_copy.load() == 64) {
+        buf_copy.store(d.size());
+        buf_copy.notify_one();
+    }
     buf_copy.store(d.size());
-    buf_copy.notify_one();
     return count;
 }
 
