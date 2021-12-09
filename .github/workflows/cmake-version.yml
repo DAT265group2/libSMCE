@@ -1,0 +1,93 @@
+name: runtime CMake version
+on: [push, pull_request]
+jobs:
+  fetch-cmake-releases:
+    runs-on: ubuntu-latest
+    outputs:
+      lists: ${{steps.compute.outputs.lists}}
+      
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Setup python
+        uses: actions/setup-python@v2
+          
+      - name: Generate cmake releases list and compute maximum minor cmake releases
+        id: compute
+        run: |   
+          python3 -m pip install wheel
+          python3 -m pip install pandas
+          echo "::set-output name=lists::$(python3 ci/output_list.py)"       
+          python3 ci/output_list.py     
+          
+  minimum-runtime-cmake-version:
+    name: compile ver ${{matrix.list.cmake_compile_ver}}; runtime ver ${{matrix.list.cmake_runtime_ver}}
+    runs-on: ubuntu-latest
+    needs: 
+      - fetch-cmake-releases
+
+    strategy:
+      fail-fast: false
+      matrix:
+        list: ${{ fromJSON(needs.fetch-cmake-releases.outputs.lists) }}
+      
+    env:
+      CC: gcc-10
+      CXX: g++-10
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Check dependencies
+        run: |
+          cmake --version
+          sudo apt-get update
+          sudo apt-get install -y curl wget git ninja-build g++-10 libssl-dev libmosquitto-dev
+
+      - name: Install CMake build version cmake >=3.16
+        if: matrix.list.cmake_compile_ver == matrix.list.cmake_runtime_ver
+        run: |
+          wget https://github.com/Kitware/CMake/releases/download/v${{matrix.list.cmake_runtime_ver}}/cmake-${{matrix.list.cmake_runtime_ver}}-Linux-x86_64.sh
+          sudo chmod +x cmake-${{matrix.list.cmake_runtime_ver}}-Linux-x86_64.sh
+          sudo bash ./cmake-${{matrix.list.cmake_runtime_ver}}-Linux-x86_64.sh --skip-license --prefix=/usr/local
+          cmake --version
+          
+      - name: Install CMake build version cmake<3.16
+        if: matrix.list.cmake_compile_ver != matrix.list.cmake_runtime_ver
+        run: |
+          wget https://github.com/Kitware/CMake/releases/download/v${{matrix.list.cmake_compile_ver}}/cmake-${{matrix.list.cmake_compile_ver}}-Linux-x86_64.sh
+          sudo chmod +x cmake-${{matrix.list.cmake_compile_ver}}-Linux-x86_64.sh
+          sudo bash ./cmake-${{matrix.list.cmake_compile_ver}}-Linux-x86_64.sh --skip-license --prefix=/usr/local
+          cmake --version
+
+      - name: CMake configuration
+        run: |
+          cmake \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DSMCE_CXXRT_LINKING=STATIC \
+            -DSMCE_BOOST_LINKING=SOURCE\
+            -DSMCE_OPENSSL_LINKING=STATIC \
+            -S ./ -B ./build
+            
+      - name: CMake build
+        run: |
+          cmake --build build
+
+      - name: Run libSMCE&SMCE_Tests target
+        run: |
+          cmake --build build --target SMCE_Tests
+      
+      - name: Reintsall CMake runtime minimum version
+        if: matrix.list.cmake_compile_ver != matrix.list.cmake_runtime_ver
+        run: |
+          wget https://github.com/Kitware/CMake/releases/download/v${{matrix.list.cmake_runtime_ver}}/cmake-${{matrix.list.cmake_runtime_ver}}-Linux-x86_64.sh
+          sudo chmod +x cmake-${{matrix.list.cmake_runtime_ver}}-Linux-x86_64.sh
+          sudo bash ./cmake-${{matrix.list.cmake_runtime_ver}}-Linux-x86_64.sh --skip-license --prefix=/usr/local
+          cmake --version
+
+      - name: Runtime tests
+        run: |
+          cd ${{github.workspace}}/build/test
+          ctest --output-on-error  --output-on-failure
