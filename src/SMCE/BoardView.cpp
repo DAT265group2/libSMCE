@@ -373,7 +373,71 @@ bool FrameBuffer::read_rgb444(std::span<std::byte> buf) {
         *to++ = (g & std::byte{0xF0}) | (b >> 4);
         *to++ = r >> 4;
     }
+    return true;
+}
 
+/*
+ * 76543210 | 76543210
+ * GGGBBBBB   RRRRRGGG
+ */
+void rgb565ToRgb888(std::span<const std::byte> buf, std::byte* res) {
+    // read two bytes
+    // read from rgb565 then write to the rgb888
+    for (auto i = buf.begin(); i != buf.end(); ++i) {
+        std::byte low = *i++;
+        std::byte high = *i;
+
+        // red
+        *res++ = (high & (std::byte)0xF8) | (high >> 5);
+        // green
+        *res++ = ((high & (std::byte)0x07) << 5) | ((low & (std::byte)0xE0) >> 3) | ((high & (std::byte)0x06) >> 1);
+        // blue
+        *res++ = (low << 3) | ((low & (std::byte)0x1F) >> 2);
+    }
+}
+
+bool FrameBuffer::write_rgb565(std::span<const std::byte> buf) {
+    if (!exists())
+        return false;
+
+    auto& frame_buf = m_bdat->frame_buffers[m_idx];
+    if (buf.size() != frame_buf.data.size() / 3 * 2)
+        return false;
+    [[maybe_unused]] std::lock_guard lk{frame_buf.data_mut};
+
+    auto* res = frame_buf.data.data();
+    rgb565ToRgb888(buf, res);
+
+    return true;
+}
+
+void rgb888ToRgb565(const std::byte* buf, std::span<std::byte> res) {
+    // read three bytes(24bits)
+    for (auto i = res.begin(); i != res.end(); ++i) {
+
+        // pick out 24bits in buffer
+        std::byte red = *buf++;
+        std::byte green = *buf++;
+        std::byte blue = *buf++;
+
+        // read from rgb888 then write to the rgb565
+        *i++ = ((green & (std::byte)0x1C) << 3) | ((blue & (std::byte)0xF8) >> 3);
+        *i = (red & (std::byte)0xF8) | ((green & (std::byte)0xE0) >> 5);
+    }
+}
+
+bool FrameBuffer::read_rgb565(std::span<std::byte> res) {
+    if (!exists())
+        return false;
+
+    auto& frame_buf = m_bdat->frame_buffers[m_idx];
+    if (res.size() != frame_buf.data.size() / 3 * 2)
+        return false;
+    [[maybe_unused]] std::lock_guard lk{frame_buf.data_mut};
+
+    auto* buf = frame_buf.data.data();
+
+    rgb888ToRgb565(buf, res);
     return true;
 }
 
