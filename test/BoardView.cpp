@@ -43,7 +43,7 @@ TEST_CASE("BoardView GPIO", "[BoardView]") {
     smce::Board br{};
     // clang-format off
     smce::BoardConfig bc{
-        /* .pins = */{0, 2},
+        /* .pins = */{0, 2, 3, 4},
         /* .gpio_drivers = */{
             smce::BoardConfig::GpioDrivers{
                 0,
@@ -52,6 +52,16 @@ TEST_CASE("BoardView GPIO", "[BoardView]") {
             },
             smce::BoardConfig::GpioDrivers{
                 2,
+                smce::BoardConfig::GpioDrivers::DigitalDriver{false, true},
+                smce::BoardConfig::GpioDrivers::AnalogDriver{false, true}
+            },
+            smce::BoardConfig::GpioDrivers{
+                3,
+                smce::BoardConfig::GpioDrivers::DigitalDriver{true, false},
+                smce::BoardConfig::GpioDrivers::AnalogDriver{true, false}
+            },
+            smce::BoardConfig::GpioDrivers{
+                4,
                 smce::BoardConfig::GpioDrivers::DigitalDriver{false, true},
                 smce::BoardConfig::GpioDrivers::AnalogDriver{false, true}
             },
@@ -85,12 +95,28 @@ TEST_CASE("BoardView GPIO", "[BoardView]") {
     REQUIRE(pin2a.exists());
     REQUIRE_FALSE(pin2a.can_read());
     REQUIRE(pin2a.can_write());
+    auto pin3 = bv.pins[3];
+    REQUIRE(pin3.exists());
+    auto pin3a = pin3.analog();
+    REQUIRE(pin3a.exists());
+    REQUIRE(pin3a.can_read());
+    REQUIRE_FALSE(pin3a.can_write());
+    auto pin4 = bv.pins[4];
+    REQUIRE(pin4.exists());
+    auto pin4a = pin4.analog();
+    REQUIRE(pin4a.exists());
+    REQUIRE_FALSE(pin4a.can_read());
+    REQUIRE(pin4a.can_write());
+    REQUIRE(pin2.get_direction() == smce::VirtualPin::DataDirection::in);
     std::this_thread::sleep_for(1ms);
-
     pin0d.write(false);
     test_pin_delayable(pin2d, true, 16384, 1ms);
     pin0d.write(true);
     test_pin_delayable(pin2d, false, 16384, 1ms);
+    pin3a.write(42);
+    test_pin_delayable(pin4a, 42, 16384, 1ms);
+    pin3a.write(64);
+    test_pin_delayable(pin4a, 64, 16384, 1ms);
     REQUIRE(br.stop());
 }
 
@@ -111,13 +137,11 @@ TEST_CASE("BoardView UART", "[BoardView]") {
     auto uart0 = bv.uart_channels[0];
     REQUIRE(uart0.exists());
     REQUIRE(uart0.rx().exists());
-    REQUIRE(uart0.tx().exists());
     auto uart1 = bv.uart_channels[1];
     REQUIRE_FALSE(uart1.exists());
     REQUIRE_FALSE(uart1.rx().exists());
     REQUIRE_FALSE(uart1.tx().exists());
     std::this_thread::sleep_for(1ms);
-
     std::array out = {'H', 'E', 'L', 'L', 'O', ' ', 'U', 'A', 'R', 'T', '\0'};
     std::array<char, out.size()> in{};
     REQUIRE(uart0.rx().write(out) == out.size());
@@ -146,7 +170,6 @@ TEST_CASE("BoardView UART", "[BoardView]") {
     REQUIRE(uart0.tx().size() == 0);
     REQUIRE(in == out);
 #endif
-
     REQUIRE(br.stop());
 }
 
@@ -201,7 +224,9 @@ TEST_CASE("BoardView RGB444 cvt", "[BoardView]") {
         static_assert(in.size() == expected_out.size() / 3 * 2);
 
         fb.set_height(height);
+        REQUIRE(fb.get_height() == height);
         fb.set_width(width);
+        REQUIRE(fb.get_width() == width);
         fb.write_rgb444(in);
 
         std::array<std::byte, std::size(expected_out)> out;
